@@ -5,7 +5,7 @@ import Countdown from "./CountDown";
 
 function SetCountDown() {
   // Set the target date (Format: YYYY-MM-DDTHH:mm:ss)
-  const targetDate = "2025-03-30T18:59:59";
+  const targetDate = "2025-06-30T18:59:59";
 
   return (
     <div className="App">
