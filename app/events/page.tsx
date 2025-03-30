@@ -1,4 +1,5 @@
 import Image from "next/image"
+import SetCountDown from "./SetCoundDown"
 
 export default function Events() {
   return (
@@ -10,7 +11,7 @@ export default function Events() {
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2">
               <div className="bg-[#f0befd] rounded-lg p-6 text-center">
-                <div className="text-[#5b3758] text-4xl font-bold mb-4">00 : 00 : 00</div>
+                <div className="text-[#5b3758] text-4xl font-bold mb-4"><SetCountDown /></div>
                 <p className="text-[#5b3758] font-medium">Event Name</p>
                 <p className="text-[#5b3758] text-sm mt-2">Time: 4pm Venue: Vile Parle, Garden</p>
                 <p className="text-[#5b3758] text-sm mt-4">(Invites automatically are send on their gmail)</p>
