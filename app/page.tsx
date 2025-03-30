@@ -23,11 +23,12 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Prasham :- Changed the div for the grid class and curved the edges */}
         <section className="mb-10">
-          <div className="bg-[#c5a7ba] rounded-lg p-6 grid grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">Take Part Today</h2>
-              <div className="bg-white p-4 rounded-md">
+          <div className="bg-[#b27b92] rounded-xl p-10">
+              <h2 className="text-2xl font-bold text-white mb-4 text-center">Take Part Today</h2>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white p-4 rounded-xl w-80 ml-20">
                 <Image
                   src="/placeholder.svg?height=200&width=150"
                   alt="The Writing Revolution Book Cover"
@@ -36,8 +37,7 @@ export default function Home() {
                   className="mx-auto mb-4"
                 />
               </div>
-            </div>
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center items-center">
               <p className="text-white mb-4">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
               </p>
@@ -45,10 +45,11 @@ export default function Home() {
               <button className="bg-[#fde8be] text-[#9d5583] px-4 py-2 rounded-md w-max">Know More</button>
             </div>
           </div>
+            </div>
         </section>
 
         <section className="mb-10">
-          <div className="bg-[#c5a7ba] bg-opacity-50 rounded-lg p-6">
+          <div className="bg-[#b27b92] bg-opacity-75 rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Your Reading Inspiration for Today</h2>
             <div className="scroll-container h-32 flex items-center justify-center">
               <p className="text-center">Message opening animation (shows up)</p>

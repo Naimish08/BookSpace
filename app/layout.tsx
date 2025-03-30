@@ -77,7 +77,7 @@ export default function RootLayout({
           </nav>
         </header>
         {children}
-        <footer className="bg-[#c5a7ba] text-[#ffffff] p-6">
+        <footer className="bg-[#b27b92] text-[#ffffff] p-6">
           <div className="max-w-5xl mx-auto grid grid-cols-3 gap-5">
             <div>
               <h3 className="font-bold mb-2">BookSpace</h3>

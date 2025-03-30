@@ -5,12 +5,12 @@ export default function Events() {
   return (
     <main className="min-h-screen bg-[#ffefd0]">
       <div className="max-w-6xl mx-auto">
-        <section className="bg-[#9d5583] p-6 text-white">
-          <h1 className="text-2xl font-bold mb-4">What's Next?</h1>
+        <section className="bg-[#9d5583] p-10 text-whiten ">
+          <h1 className="text-2xl font-bold mb-4 text-[#ffefd0]">What's Next?</h1>
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 ">
             <div className="col-span-2">
-              <div className="bg-[#f0befd] rounded-lg p-6 text-center">
+              <div className="bg-[#f0befd] rounded-xl p-4 text-center ml-40">
                 <div className="text-[#5b3758] text-4xl font-bold mb-4"><SetCountDown /></div>
                 <p className="text-[#5b3758] font-medium">Event Name</p>
                 <p className="text-[#5b3758] text-sm mt-2">Time: 4pm Venue: Vile Parle, Garden</p>
@@ -18,7 +18,7 @@ export default function Events() {
                 <button className="bg-[#ffefd0] text-[#9d5583] px-4 py-2 rounded-md mt-4">Register Now</button>
               </div>
             </div>
-            <div className="col-span-1">
+            <div className="col-span-1 mt-12">
               <Image
                 src="/placeholder.svg?height=150&width=150"
                 alt="Event illustration"
@@ -30,14 +30,14 @@ export default function Events() {
           </div>
         </section>
 
-        <section className="p-6">
-          <p className="text-center mb-6">Snap Shot of our Flagship/ last event</p>
+        <section className="py-6">
+          <p className="text-center m-6">Snap Shot of our Flagship/ last event</p>
 
-          <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-2 gap-6 mb-8 bg-[#f8bcfc] p-6">
             <div>
-              <h2 className="text-2xl font-bold text-[#9d5583] mb-2">Blind Date with a Book</h2>
+              <h2 className="text-2xl font-bold text-[#9d5583] mb-2 text-center">Blind Date with a Book</h2>
               <div className="text-4xl font-bold text-center">×</div>
-              <h2 className="text-2xl font-bold text-[#9d5583] mb-4">Book Exchange</h2>
+              <h2 className="text-2xl font-bold text-black mb-4 text-center">Book Exchange</h2>
               <p className="text-center">Gargee's Cipher Animation</p>
               <div className="flex justify-center gap-4 mt-4">
                 <div className="w-12 h-12 rounded-full bg-[#9d5583]"></div>
@@ -82,7 +82,7 @@ export default function Events() {
             </div>
           </div>
 
-          <div className="mb-8">
+          <div className="m-8 ">
             <h2 className="text-xl font-bold mb-4 text-center">Our Past Events...</h2>
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map((item) => (
