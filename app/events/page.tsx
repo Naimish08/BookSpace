@@ -31,7 +31,7 @@ export default function Events() {
         </section>
 
         <section className="py-6">
-          <p className="text-center m-6">Snap Shot of our Flagship/ last event</p>
+          <p className="text-center m-6">Snap Shot of our Flagship/ last event </p>
 
           <div className="grid grid-cols-2 gap-6 mb-8 bg-[#f8bcfc] p-6">
             <div>
