@@ -1,4 +1,5 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -81,10 +82,18 @@ const config: Config = {
         playfair: ["var(--font-playfair)", "serif"],
         poppins: ["var(--font-poppins)", "sans-serif"],
       },
+      animation: {
+        'welcome-text': 'welcome-text 3s ease-out forwards',
+      },
+      keyframes: {
+        'welcome-text': {
+          '0%': { transform: 'translateY(50%)', opacity: 0 },
+          '100%': { transform: 'translateY(-20%)', opacity: 1 },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
 
-export default config
-
+export default config;
