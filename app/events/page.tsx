@@ -55,8 +55,8 @@ export default function Events() {
             <h2 className="text-xl font-bold mb-4 text-center">Mark Your Calenders</h2>
             <div className="bg-white rounded-lg p-4 max-w-md mx-auto">
               <div className="calendar-header text-center mb-4">
-                <h3 className="text-3xl font-bold">april</h3>
-                <p>2023</p>
+                <h3 className="text-3xl font-bold">April</h3>
+                <p>2025</p>
               </div>
               <div className="calendar-container">
                 <div className="grid grid-cols-7 gap-2 text-center mb-2">
