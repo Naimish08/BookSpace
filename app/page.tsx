@@ -10,8 +10,8 @@ import EventCarousel from "@/components/event-carousel"
 
 export default function Home() {
   return (
-  <div className="min-h-screen bg-[#f8efd0]">
-    <main>
+    <div className="min-h-screen bg-[#f8efd0]">
+      <main>
         {/* Welcome Section */}
         <section className="container mx-auto px-4 py-8">
           <h2 className="text-3xl font-caveat italic text-[#8d6e63] mb-4">Welcome to BookSpace</h2>
@@ -26,33 +26,24 @@ export default function Home() {
               <div className="mt-6 text-center">
                 <p className="text-[#5d4037] mb-2"></p>
                 <Button className="bg-[#d1a7c2] hover:bg-[#b589a8] text-white"
-                onClick={() => window.open("https://aboutus_link", "_blank")}
+                  onClick={() => window.open("https://aboutus_link", "_blank")}
                 >Explore </Button>
               </div>
             </div>
           </div>
         </section>
 
-<<<<<<< Updated upstream
-        {/* Prasham :- Changed the div for the grid class and curved the edges */}
-        <section className="mb-10">
-          <div className="bg-[#b27b92] rounded-xl p-10">
-              <h2 className="text-2xl font-bold text-white mb-4 text-center">Take Part Today</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white p-4 rounded-xl w-80 ml-20">
-=======
         {/* Take Part Today Section */}
         <section className="container mx-auto px-4 py-8">
-        <div
-            className="rounded-2xl p-6 md:p-8 relative overflow h-[350px]"
+          <div
+            className="rounded-2xl p-6 md:p-8 relative overflow-hidden h-[350px]"
             style={{
               background: "linear-gradient(to bottom, #A27B94, #B16194)"
             }}
-        >
+          >
             <h2 className="text-3xl font-serif text-white text-center mb-6">Take Part Today</h2>
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="md:w-1/3">
->>>>>>> Stashed changes
                 <Image
                   src="/thewritingrev.png"
                   alt="The Writing Revolution Book Cover"
@@ -60,32 +51,22 @@ export default function Home() {
                   height={300}
                   className="rounded-md border-4 border-white shadow-lg"
                 />
-              </div> 
+              </div>
               <div className="flex flex-col items-center mt-4">
                 <p className="text-white text-lg mb-4">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore Sed ut perspiciatis unde omnis
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore Sed ut perspiciatis unde omnis 
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore Sed ut perspiciatis unde omnis
                 </p>
                 <Button variant="outline" className="bg-white text-[#a87c9f] hover:bg-gray-100 "
                   onClick={() => window.open("https://eventpage_link", "_blank")}>
                   Know More
                 </Button>
               </div>
-<<<<<<< Updated upstream
-            <div className="flex flex-col justify-center items-center">
-              <p className="text-white mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-              </p>
-              <p className="text-sm text-white mb-4">Takes to the Event Page where this event is described</p>
-              <button className="bg-[#fde8be] text-[#9d5583] px-4 py-2 rounded-md w-max">Know More</button>
-=======
->>>>>>> Stashed changes
             </div>
           </div>
-            </div>
         </section>
 
-<<<<<<< Updated upstream
+        {/* Reading Inspiration Section */}
         <section className="mb-10">
           <div className="bg-[#b27b92] bg-opacity-75 rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Your Reading Inspiration for Today</h2>
@@ -94,50 +75,43 @@ export default function Home() {
             </div>
           </div>
         </section>
-=======
-        {/* Reading Inspiration Section ,,,,,button//md:w-2/3 */}
-  <section className="container mx-auto px-4 py-8 ">
-    <div className="bg-[#d1a7c2] rounded-2xl p-6 md:p-8 relative overflow h-[350px]">
->>>>>>> Stashed changes
 
-      {/* Decorative Circles */}
-      <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-[#e6c0d7] opacity-50"></div>
-      <div className="absolute -left-10 -bottom-10 w-32 h-32 rounded-full bg-[#e6c0d7] opacity-50"></div>
-      <div className="absolute -right-20 top+20 w-16 h-16 rounded-full bg-[#e6c0d7] opacity-50"></div>
-      <div className="absolute -left-10 -bottom-20 w-16 h-16 rounded-full bg-[#e6c0d7] opacity-50"></div>
-
-      {/* Title */}
-      <h2 className="text-3xl font-serif text-white text-center mb-6 relative z-10">
-        Your Reading Inspiration for Today
-      </h2>
-
-      <div className="mt-10">
-        {/* Flex Row for Scroll and Image */}
-        <div className="relative z-10 flex justify-center items-center h-40">
-                  {/* Absolutely positioned image at left */}
-          <div className="absolute left-8">
-            <Image
-              src="/flower.png"
-              alt="flower"
-              width={200}
-              height={150}
-              className="rounded-md"
-            />
+        <section className="container mx-auto px-4 py-8 ">
+          <div className="bg-[#d1a7c2] rounded-2xl p-6 md:p-8 relative overflow-hidden h-[350px]">
+            {/* Decorative Circles */}
+            <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-[#e6c0d7] opacity-50"></div>
+            <div className="absolute -left-10 -bottom-10 w-32 h-32 rounded-full bg-[#e6c0d7] opacity-50"></div>
+            <div className="absolute -right-20 top-20 w-16 h-16 rounded-full bg-[#e6c0d7] opacity-50"></div>
+            <div className="absolute -left-10 -bottom-20 w-16 h-16 rounded-full bg-[#e6c0d7] opacity-50"></div>
+            {/* Title */}
+            <h2 className="text-3xl font-serif text-white text-center mb-6 relative z-10">
+              Your Reading Inspiration for Today
+            </h2>
+            <div className="mt-10">
+              {/* Flex Row for Scroll and Image */}
+              <div className="relative z-10 flex justify-center items-center h-40">
+                {/* Absolutely positioned image at left */}
+                <div className="absolute left-8">
+                  <Image
+                    src="/flower.png"
+                    alt="flower"
+                    width={200}
+                    height={150}
+                    className="rounded-md"
+                  />
+                </div>
+                {/* Scroll Message stays in center */}
+                <ScrollMessage />
+              </div>
+            </div>
           </div>
-
-          {/* Scroll Message stays in center */}
-          <ScrollMessage />
-        </div>
-      </div>
-  </div>
-</section>
-
+        </section>
 
         {/* What's Happening Section */}
-          <section className="max-w-5xl mx-auto px-4 py-8">
-            <h2 className="text-3xl font-serif text-[#a87c9f] text-center mb-8">What's Happening</h2>
-            <EventCarousel />
-          </section>
+        <section className="max-w-5xl mx-auto px-4 py-8">
+          <h2 className="text-3xl font-serif text-[#a87c9f] text-center mb-8">What's Happening</h2>
+          <EventCarousel />
+        </section>
 
         {/* Book Recommends Section */}
         <section className="max-w-5xl mx-auto px-4 py-8">
@@ -145,10 +119,9 @@ export default function Home() {
           <BookCarousel />
         </section>
 
-
         {/* Currently Reading Section */}
         <section className="container mx-auto px-4 py-12 relative">
-        <div className="absolute top-[-210px] left-0 right-0 bottom-0 bg-[url('/bookshelf.png')] bg-cover bg-top opacity-70 z-0"></div>
+          <div className="absolute top-[-210px] left-0 right-0 bottom-0 bg-[url('/bookshelf.png')] bg-cover bg-top opacity-70 z-0"></div>
           <div className="relative bg-[#f8efd0]/90 rounded-2xl p-6 max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row gap-6 items-center">
               <div className="md:w-1/4">
@@ -171,7 +144,8 @@ export default function Home() {
                   Book Discussion: 3/03/2025
                 </p>
                 <Button className="bg-[#a87c9f] hover:bg-[#8d6e63] text-white"
-                onClick={() => window.open("https://some_link", "_blank")}>
+                  onClick={() => window.open("https://some_link", "_blank")}
+                >
                   Learn more
                 </Button>
               </div>
@@ -179,7 +153,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-  </div>
+    </div>
   )
 }
 
