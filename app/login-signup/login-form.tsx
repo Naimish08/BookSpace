@@ -5,9 +5,80 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import Image from "next/image";
+import { createClient } from "@/utils/superbase/client";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("signup")
+  const [form, setForm] = useState({
+    username: "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    city: "",
+    terms: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const supabase = createClient();
+
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    if (activeTab === "signup") {
+      if (form.password !== form.confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
+      if (!form.terms) {
+        setError("You must agree to the terms and conditions");
+        setLoading(false);
+        return;
+      }
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            username: form.username,
+            name: form.name,
+            city: form.city,
+          },
+        },
+      });
+      if (error) setError(error.message);
+      else setSuccess("Signup successful! Please check your email to verify your account.");
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.username, // allow username as email for now
+        password: form.password,
+      });
+      if (error) setError(error.message);
+      else setSuccess("Login successful!");
+    }
+    setLoading(false);
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    if (error) setError(error.message);
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#fde8be" }}>
@@ -34,7 +105,7 @@ export default function Component() {
               <h1 className="text-2xl font-semibold text-white text-center mb-8">LOGIN TO CONTINUE</h1>
 
               {/* Google Sign In Button */}
-              <Button variant="outline" className="w-full mb-6 bg-white text-gray-700 border-0  py-3 rounded-full">
+              <Button variant="outline" className="w-full mb-6 bg-white text-gray-700 border-0  py-3 rounded-full" onClick={handleGoogle} disabled={loading}>
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -66,7 +137,7 @@ export default function Component() {
               {/* Tab Buttons */}
               <div className="flex mb-6 rounded-full overflow-hidden">
                 <button
-                  onClick={() => setActiveTab("signup")}
+                  onClick={() => { setActiveTab("signup"); setError(""); setSuccess(""); }}
                   className={`flex-1 py-3 px-6 text-sm font-medium transition-colors ${
                     activeTab === "signup" ? "text-white" : "text-gray-300"
                   }`}
@@ -77,7 +148,7 @@ export default function Component() {
                   Sign up
                 </button>
                 <button
-                  onClick={() => setActiveTab("signin")}
+                  onClick={() => { setActiveTab("signin"); setError(""); setSuccess(""); }}
                   className={`flex-1 py-3 px-6 text-sm font-medium transition-colors ${
                     activeTab === "signin" ? "text-white" : "text-gray-300"
                   }`}
@@ -89,68 +160,100 @@ export default function Component() {
                 </button>
               </div>
 
+              {/* Error/Success Messages */}
+              {error && <div className="mb-4 text-red-200 text-center">{error}</div>}
+              {success && <div className="mb-4 text-green-200 text-center">{success}</div>}
+
               {/* Form Fields */}
-              <div className="space-y-4 mb-6">
-                <Input
-                  placeholder="Username *"
-                  className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                />
-                {activeTab === "signup" && (
-                  <>
-                    <Input
-                      placeholder="Name *"
-                      className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                    />
-                    <Input
-                      placeholder="E-Mail *"
-                      type="email"
-                      className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                    />
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-4 mb-6">
+                  <Input
+                    placeholder="Username *"
+                    name="username"
+                    value={form.username}
+                    onChange={handleChange}
+                    className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                  />
+                  {activeTab === "signup" && (
+                    <>
+                      <Input
+                        placeholder="Name *"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
+                      <Input
+                        placeholder="E-Mail *"
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
+                      <Input
+                        placeholder="Password *"
+                        type="password"
+                        name="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
+                      <Input
+                        placeholder="Confirm Password *"
+                        type="password"
+                        name="confirmPassword"
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
+                      <Input
+                        placeholder="City"
+                        name="city"
+                        value={form.city}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
+                    </>
+                  )}
+                  {activeTab === "signin" && (
                     <Input
                       placeholder="Password *"
                       type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
                       className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
                     />
-                    <Input
-                      placeholder="Confirm Password *"
-                      type="password"
-                      className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                    />
-                    <Input
-                      placeholder="City"
-                      className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                    />
-                  </>
-                )}
-                {activeTab === "signin" && (
-                  <Input
-                    placeholder="Password *"
-                    type="password"
-                    className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                  />
-                )}
-              </div>
-
-              {/* Terms Checkbox */}
-              {activeTab === "signup" && (
-                <div className="flex items-center space-x-2 mb-6">
-                  <Checkbox
-                    id="terms"
-                    className="border-white data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
-                  />
-                  <label htmlFor="terms" className="text-sm text-white">
-                    I agree with the terms and conditions
-                  </label>
+                  )}
                 </div>
-              )}
 
-              {/* Submit Button */}
-              <Button
-                className="w-full py-3 rounded-full text-white font-medium"
-                style={{ backgroundColor: "#220440" }}
-              >
-                Sign in
-              </Button>
+                {/* Terms Checkbox */}
+                {activeTab === "signup" && (
+                  <div className="flex items-center space-x-2 mb-6">
+                    <Checkbox
+                      id="terms"
+                      name="terms"
+                      checked={form.terms}
+                      onCheckedChange={(checked) => setForm((prev) => ({ ...prev, terms: !!checked }))}
+                      className="border-white data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
+                    />
+                    <label htmlFor="terms" className="text-sm text-white">
+                      I agree with the terms and conditions
+                    </label>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  className="w-full py-3 rounded-full text-white font-medium"
+                  style={{ backgroundColor: "#220440" }}
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? "Please wait..." : activeTab === "signup" ? "Sign up" : "Sign in"}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
