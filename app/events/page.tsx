@@ -1,6 +1,6 @@
 import Image from "next/image"
 import SetCountDown from "./SetCoundDown"
-
+import CalendarEmbed from "@/components/Calendar"
 export default function Events() {
   return (
     <main className="min-h-screen bg-[#ffefd0]">
@@ -51,35 +51,9 @@ export default function Events() {
             </div>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4 text-center">Mark Your Calenders</h2>
-            <div className="bg-white rounded-lg p-4 max-w-md mx-auto">
-              <div className="calendar-header text-center mb-4">
-                <h3 className="text-3xl font-bold">April</h3>
-                <p>2025</p>
-              </div>
-              <div className="calendar-container">
-                <div className="grid grid-cols-7 gap-2 text-center mb-2">
-                  <div>SUN</div>
-                  <div>MON</div>
-                  <div>TUE</div>
-                  <div>WED</div>
-                  <div>THU</div>
-                  <div>FRI</div>
-                  <div>SAT</div>
-                </div>
-                <div className="grid grid-cols-7 gap-2 text-center">
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
-                    <div key={day} className={`p-2 ${day === 15 || day === 22 ? "bg-[#c5a7ba] rounded-full" : ""}`}>
-                      {day}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p className="text-xs text-center mt-4">
-                (When the reader taps on the circle, a little box of basic info shows up)
-              </p>
-            </div>
+           <div className="min-h-screen bg-gray-100 p-4">
+            <h1 className="text-2xl font-bold mb-4 text-center">Event Calendar</h1>
+            <CalendarEmbed />
           </div>
 
           <div className="m-8 ">
