@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSpace - Your Reading Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #fcefdc;
+            color: #2d1e2f;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: #fcefdc;
+            border-bottom: 2px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .logo .purple {
+            color: #965bcd;
+        }
+
+        .nav {
+            display: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #2d1e2f;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: #965bcd;
+        }
+
+        /* Challenge Banner */
+        .challenge-section {
+            padding: 2rem 0;
+        }
+
+        .challenge-banner {
+            position: relative;
+            background: linear-gradient(135deg, #391D63, #6e3eb2);
+            border-radius: 1.5rem;
+            height: 400px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .challenge-decoration-left {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 200px;
+            background: rgba(110, 62, 178, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .challenge-decoration-right {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 150px;
+            height: 120px;
+            background: #6e3eb2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .challenge-content {
+            z-index: 2;
+            position: relative;
+        }
+
+        .challenge-content h2 {
+            font-size: 2.5rem;
+            font-family: Georgia, serif;
+            margin-bottom: 1rem;
+        }
+
+        .challenge-envelope {
+            font-size: 4rem;
+            margin: 1rem 0;
+        }
+
+        .challenge-signup {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-animation {
+            font-size: 0.9rem;
+            color: #e5d7ff;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            padding: 2rem 0;
+        }
+
+        .profile-card {
+            background: linear-gradient(to bottom, #A27B94, #8B5A7F);
+            color: white;
+        }
+
+        .profile-card .card-header,
+        .profile-card .card-title {
+            color: white;
+        }
+
+        .profile-username {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-layout {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-pic {
+            width: 8rem;
+            height: 8rem;
+            background: white;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .profile-bio {
+            flex: 1;
+            margin-top: 1rem;
+        }
+
+        .bio-line {
+            height: 4px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
+            margin: 0.75rem 0;
+        }
+
+        .bio-line:nth-child(2) { width: 80%; }
+        .bio-line:nth-child(3) { width: 60%; }
+        .bio-line:nth-child(4) { width: 80%; }
+
+        .bio-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #e5d7ff;
+            margin-top: 1rem;
+        }
+
+        .realname-section {
+            margin: 1.5rem 0;
+        }
+
+        .realname-section h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .connect-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .genres-section {
+            margin: 1.5rem 0;
+        }
+
+        .genres-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .genre-tag {
+            background: #5A3D6B;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+        }
+
+        .inputs-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.5rem;
+            height: 1.5rem;
+            background: #5A3D6B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            background: white;
+            color: black;
+            border-radius: 9999px;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .connection-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: #e5d7ff;
+            line-height: 1.5;
+        }
+
+        /* Monthly Recap and Calendar */
+        .recap-section {
+            padding: 2rem 0;
+        }
+
+        .recap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .recap-card {
+            background: #7b4794;
+            color: white;
+        }
+
+        .recap-card .card-header,
+        .recap-card .card-title {
+            color: white;
+        }
+
+        .books-row {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .book-item {
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .book-cover {
+            width: 5rem;
+            height: 8rem;
+            background: #5e2e91;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-stars {
+            display: flex;
+            justify-content: center;
+            gap: 0.125rem;
+        }
+
+        .star {
+            color: #fbbf24;
+            font-size: 0.75rem;
+        }
+
+        .badges-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .badge {
+            background: #d6b8ff;
+            color: black;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            width: fit-content;
+        }
+
+        .highest-rated {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .highest-rated .book-cover {
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .crown {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            font-size: 1.5rem;
+        }
+
+        /* Calendar */
+        .calendar-card {
+            background: #824e74;
+            color: white;
+        }
+
+        .calendar-card .card-header,
+        .calendar-card .card-title {
+            color: white;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-days-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .calendar-day:hover:not(.empty) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-note {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Book Diary */
+        .diary-section {
+            padding: 2rem 0;
+        }
+
+        .diary-card {
+            background: #824e74;
+            color: white;
+        }
+
+        .diary-card .card-title {
+            color: white;
+        }
+
+        .diary-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .diary-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .diary-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .diary-note {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Library Section */
+        .library-section {
+            padding: 2rem 0;
+        }
+
+        .library-title {
+            text-align: center;
+            color: #824e74;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .library-shelf {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .shelf-background {
+            position: absolute;
+            inset: 0;
+            display: flex;
+        }
+
+        .shelf-left, .shelf-right {
+            width: 18rem;
+            height: 12rem;
+            background: linear-gradient(45deg, #f3e8ff, #e9d5ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .shelf-left {
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+
+        .shelf-right {
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .shelf-center {
+            flex: 1;
+            background: linear-gradient(to right, #fef3c7, #fef7ed);
+        }
+
+        .shelf-content {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 0 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .shelf-title {
+            color: #824e74;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .shelf-books {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .shelf-book {
+            width: 4rem;
+            height: 6rem;
+            background: #5e2e91;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .shelf-line {
+            width: 100%;
+            height: 4px;
+            background: #824e74;
+            border-radius: 2px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #a678d1;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .footer h3, .footer h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        /* Form Elements */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #965bcd;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: black;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-rounded {
+            border-radius: 9999px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .input-rounded {
+            border-radius: 9999px;
+        }
+
+        .input-light {
+            background: #fbeff8;
+            color: black;
+        }
+
+        .textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 4rem;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .nav {
+                display: flex;
+            }
+
+            .challenge-content h2 {
+                font-size: 3rem;
+            }
+
+            .inputs-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .diary-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .recap-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .inputs-row {
+                grid-template-columns: 1fr;
+            }
+
+            .diary-row {
+                grid-template-columns: 1fr;
+            }
+
+            .recap-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .shelf-left, .shelf-right {
+                width: 8rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">Book<span class="purple">Space</span></h1>
+                <nav class="nav">
+                    <a href="#">About Us</a>
+                    <a href="#">Home</a>
+                    <a href="#">Events</a>
+                    <a href="#">Club</a>
+                    <a href="#">Join Us</a>
+                    <a href="#">Writers</a>
+                    <span style="font-size: 1.5rem;">👤</span>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Challenge Banner -->
+    <section class="challenge-section">
+        <div class="container">
+            <div class="challenge-banner">
+                <div class="challenge-decoration-left">📚✨</div>
+                <div class="challenge-decoration-right">📖📚</div>
+                <div class="challenge-content">
+                    <h2>Your Challenge for today is here!</h2>
+                    <div class="challenge-envelope">✉️📜</div>
+                    <p class="challenge-signup">Sign Up to open the Challenge</p>
+                    <p class="challenge-animation">letter opening animation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section class="profile-section">
+        <div class="container">
+            <div class="card profile-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span style="font-size: 1.5rem;">📚</span>
+                        My BookSpace Profile
+                    </div>
+                    <button class="btn btn-secondary btn-sm btn-rounded">Edit</button>
+                </div>
+                <div class="card-content">
+                    <div class="profile-username">readinglovesme</div>
+                    
+                    <div class="profile-layout">
+                        <div class="profile-pic"></div>
+                        <div class="profile-bio">
+                            <div class="bio-line"></div>
+                            <div class="bio-line"></div>
+                            <div class="bio-line"></div>
+                            <div class="bio-line"></div>
+                            <div class="bio-text">(bio)</div>
+                        </div>
+                    </div>
+
+                    <div class="realname-section">
+                        <h3>Realname</h3>
+                        <div class="connect-row">
+                            <button class="btn btn-secondary btn-sm btn-rounded">CONNECT</button>
+                            <span>readinglovesme@gmail.com</span>
+                        </div>
+                    </div>
+
+                    <div class="genres-section">
+                        <h4>genres</h4>
+                        <div class="genres-row">
+                            <div class="genre-tag">genre</div>
+                            <div class="genre-tag">genre</div>
+                            <div class="genre-tag">genre</div>
+                            <div class="genre-tag">genre</div>
+                        </div>
+                    </div>
+
+                    <div class="inputs-row">
+                        <div class="input-group">
+                            <label>current read</label>
+                            <div class="input-with-icon">
+                                <input type="text" class="input input-rounded">
+                                <div class="input-icon">📖</div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>gift me a book</label>
+                            <div class="input-with-icon">
+                                <input type="text" placeholder="WISHLISTED" class="input input-rounded">
+                                <div class="input-icon">📖</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div>views</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>connections</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>searches</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <p class="connection-note">
+                        what is connection? when you slide the connect button to the right, it indicates you are interested in their profile
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monthly Recap and Calendar -->
+    <section class="recap-section">
+        <div class="container">
+            <div class="recap-grid">
+                <!-- Monthly Reading Recap -->
+                <div class="card recap-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span style="font-size: 1.5rem;">📚</span>
+                            Monthly Reading Recap
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p style="font-size: 0.9rem; margin-bottom: 1rem;">Books Read This Month</p>
+                        
+                        <div class="books-row">
+                            <div class="book-item">
+                                <div class="book-cover">📖</div>
+                                <div class="book-stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                            <div class="book-item">
+                                <div class="book-cover">📖</div>
+                                <div class="book-stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                            <div class="book-item">
+                                <div class="book-cover">📖</div>
+                                <div class="book-stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                            <div class="book-item">
+                                <div class="book-cover">📖</div>
+                                <div class="book-stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="badges-row">
+                            <div class="badge">Total Books Read: 5</div>
+                            <div class="badge">Books Reviewed: 3</div>
+                            <div class="badge">Streak: 10 days</div>
+                        </div>
+
+                        <div class="highest-rated">
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Highest Rated Book of the Month</p>
+                            <div class="book-cover">
+                                📖
+                                <div class="crown">👑</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="card calendar-card">
+                    <div class="card-header">
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" onclick="previousMonth()">◀</button>
+                            <div class="card-title" id="calendar-title">June 2024</div>
+                            <button class="calendar-nav-btn" onclick="nextMonth()">▶</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="calendar-days-header">
+                            <div>Mo</div>
+                            <div>Tu</div>
+                            <div>We</div>
+                            <div>Th</div>
+                            <div>Fr</div>
+                            <div>Sa</div>
+                            <div>Su</div>
+                        </div>
+                        <div class="calendar-days" id="calendar-days">
+                            <!-- Calendar days will be generated by JavaScript -->
+                        </div>
+                        <p class="calendar-note">
+                            <span style="font-size: 1.2rem;">📅</span> reading streak calendar
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Book Diary -->
+    <section class="diary-section">
+        <div class="container">
+            <div class="card diary-card">
+                <div class="card-header">
+                    <div class="card-title" style="width: 100%; text-align: center;">Book Diary</div>
+                </div>
+                <div class="card-content">
+                    <div class="diary-grid">
+                        <div class="diary-row">
+                            <input type="text" placeholder="Name of Book" class="input input-light">
+                            <button class="btn btn-outline">+ add a book</button>
+                        </div>
+                        
+                        <input type="text" placeholder="Author" class="input input-light">
+                        
+                        <div class="diary-row">
+                            <input type="text" placeholder="Genre" class="input input-light">
+                            <div>
+                                <div class="diary-buttons">
+                                    <button class="btn btn-primary btn-sm">pie chart</button>
+                                    <button class="btn btn-primary btn-sm">color to genre label</button>
+                                </div>
+                                <p class="diary-note">Genres I want to explore:</p>
+                            </div>
+                        </div>
+                        
+                        <div class="diary-row">
+                            <input type="text" placeholder="Start date" class="input input-light">
+                            <input type="text" placeholder="End date" class="input input-light">
+                        </div>
+                        
+                        <div class="diary-row">
+                            <div>
+                                <button class="btn btn-primary btn-sm" style="margin-bottom: 0.5rem;">my wishlist</button><br>
+                                <button class="btn btn-primary btn-sm" style="margin-bottom: 0.5rem;">reading goals</button>
+                                <p class="diary-note">updates on profile</p>
+                            </div>
+                            <div></div>
+                        </div>
+                        
+                        <textarea placeholder="How much I liked this book" class="textarea input-light"></textarea>
+                        <textarea placeholder="I think this book..." class="textarea input-light"></textarea>
+                        
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-primary">SAVE</button>
+                            <button class="btn btn-primary">PUBLISH</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Library -->
+    <section class="library-section">
+        <div class="container">
+            <div class="card">
+                <div class="card-content">
+                    <h2 class="library-title">My Library</h2>
+                    
+                    <!-- Currently Reading -->
+                    <div class="library-shelf">
+                        <div class="shelf-background">
+                            <div class="shelf-left">📚📖📗</div>
+                            <div class="shelf-center"></div>
+                            <div class="shelf-right">📚📖📗</div>
+                        </div>
+                        <div class="shelf-content">
+                            <h3 class="shelf-title">currently reading</h3>
+                            <div class="shelf-books">
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                            </div>
+                            <div class="shelf-line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Lined Up Next -->
+                    <div class="library-shelf">
+                        <div class="shelf-background">
+                            <div class="shelf-left">📚📖📗</div>
+                            <div class="shelf-center"></div>
+                            <div class="shelf-right">📚📖📗</div>
+                        </div>
+                        <div class="shelf-content">
+                            <h3 class="shelf-title">lined up next</h3>
+                            <div class="shelf-books">
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                            </div>
+                            <div class="shelf-line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Finished Reading -->
+                    <div class="library-shelf">
+                        <div class="shelf-background">
+                            <div class="shelf-left">📚📖📗</div>
+                            <div class="shelf-center"></div>
+                            <div class="shelf-right">📚📖📗</div>
+                        </div>
+                        <div class="shelf-content">
+                            <h3 class="shelf-title">finished reading</h3>
+                            <div class="shelf-books">
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                            </div>
+                            <div class="shelf-line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Reviewed -->
+                    <div class="library-shelf">
+                        <div class="shelf-background">
+                            <div class="shelf-left">📚📖📗</div>
+                            <div class="shelf-center"></div>
+                            <div class="shelf-right">📚📖📗</div>
+                        </div>
+                        <div class="shelf-content">
+                            <h3 class="shelf-title">reviewed</h3>
+                            <div class="shelf-books">
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                                <div class="shelf-book"></div>
+                            </div>
+                            <div class="shelf-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3>BOOKSPACE</h3>
+                </div>
+                <div>
+                    <h4>Address</h4>
+                    <p>Devdevesh | Sensing College of Engineering,<br>
+                    Vile Parle West, Mumbai-400056</p>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <p>bookspace@gmail.com</p>
+                    <p>+91 98765 43210</p>
+                </div>
+                <div>
+                    <h4>Follow us</h4>
+                    <div class="social-icons">
+                        <span>📷</span>
+                        <span>🐦</span>
+                        <span>📞</span>
+                        <span>✉️</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Calendar functionality
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        function updateCalendar() {
+            const calendarTitle = document.getElementById('calendar-title');
+            const calendarDays = document.getElementById('calendar-days');
+            
+            calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Clear previous days
+            calendarDays.innerHTML = '';
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Convert Sunday (0) to 6, Monday (1) to 0, etc.
+            const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+            
+            // Add empty cells for days before first day
+            for (let i = 0; i < adjustedFirstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // Fill remaining cells to complete the grid
+            const totalCells = calendarDays.children.length;
+            const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+            for (let i = 0; i < remainingCells; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+        }
+
+        function previousMonth() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            updateCalendar();
+        }
+
+        function nextMonth() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            updateCalendar();
+        }
+
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalendar();
+        });
+
+        // Add some interactivity to buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Add a simple click effect
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 100);
+                });
+            });
+
+            // Add focus effects for inputs
+            const inputs = document.querySelectorAll('.input, .textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = '#965bcd';
+                    this.style.boxShadow = '0 0 0 2px rgba(150, 91, 205, 0.2)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = '#d1d5db';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
