@@ -3,12 +3,16 @@
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 .font-caveat {
   font-family: 'Caveat', cursive;
 }
 .font-merriweather {
   font-family: 'Merriweather', serif;
+}
+.font-literata {
+  font-family: 'Literata', serif;
 }
 
 :root {
@@ -41,6 +45,7 @@
 body {
   color: var(--purple-dark);
   background-color: var(--cream-bg);
+  overflow-x: hidden;
 }
 
 h1,

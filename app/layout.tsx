@@ -1,13 +1,9 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter, Playfair_Display, Poppins } from "next/font/google"
-import "./globals.css"
-import Link from "next/link"
-import { FaInstagram, FaLinkedin, FaEnvelope, FaPhone } from 'react-icons/fa';
-import { Instagram, Facebook, Twitter } from "lucide-react"
-import './globals.css'
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Inter, Playfair_Display, Poppins } from "next/font/google";
+import "./globals.css";
+import Header from "@/components/Header"; // Create this file
+import Footer from "@/components/Footer"; // optional if you want to move it out too
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -24,28 +20,23 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "BookSpace",
   description: "A community where readers and books are celebrated",
-  generator: "v0.dev",
+  generator: "BookSpace Team",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-      <html lang="en">
-        <body
-          className={`${inter.variable} ${playfair.variable} ${poppins.variable} font-poppins`}
-        >
-          <header className="bg-[#ffefd0] p-4 flex justify-between items-center">
-            <Link href="/" className="text-[#5b3758] text-xl font-bold">
-              BookSpace
-            </Link>
-            <Navbar />
-          </header>
-          {children}
-          <Footer />
-        </body>
-      </html>
+    <html lang="en">
+      <body
+        className={`${inter.variable} ${playfair.variable} ${poppins.variable} font-poppins`}
+      >
+        <Header />
+        {children}
+        <Footer />
+      </body>
+    </html>
   );
 }

@@ -3,7 +3,7 @@ import SetCountDown from "./SetCoundDown"
 import CalendarEmbed from "@/components/Calendar"
 export default function Events() {
   return (
-    <main className="min-h-screen bg-[#ffefd0]">
+    <main className="min-h-screen bg-[#FDE8BE]">
       <div className="max-w-6xl mx-auto">
         <section className="bg-[#9d5583] p-10 text-whiten ">
           <h1 className="text-2xl font-bold mb-4 text-[#ffefd0]">What's Next?</h1>
