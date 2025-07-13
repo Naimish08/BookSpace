@@ -17,7 +17,9 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env*
+.env:
+NEXT_PUBLIC_SUPABASE_URL=https://niywwuhzzsjqjsgqseyw.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5peXd3dWh6enNqcWpzZ3FzZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMDM0MzYsImV4cCI6MjA2NjY3OTQzNn0.yCPTjf3YVqMXkpzU1nOFS3AwvC2IyNepkF3h8qT2WBo
 
 # vercel
 .vercel
