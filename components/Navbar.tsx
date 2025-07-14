@@ -1,3 +1,4 @@
+// This is a simple Navbar component is not used in any codebase.
 import Link from "next/link"
 
 const Navbar = () => {
