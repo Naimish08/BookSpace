@@ -57,7 +57,7 @@ const styles = {
   },
   timer: {
     fontSize: 48,
-    color: '#28a745',
+    color: '#241943',
   },
   expired: {
     fontSize: 36,
