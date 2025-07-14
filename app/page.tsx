@@ -65,7 +65,7 @@ export default function Home() {
                 background: "linear-gradient(to bottom, #E1B5EE, #8D67BB)"
             }}
           >
-            <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-2">Take Part Today</h2>
+            <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-2 font-bold">Take Part Today</h2>
               
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="md:w-1/3">
@@ -112,7 +112,7 @@ export default function Home() {
                   <div className="hidden md:block absolute -left-8 -bottom-20 w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#BA7FCB] opacity-50"></div>
 
                   {/* Title */}
-                  <h2 className="text-2xl md:text-3xl font-serif text-[#241943] text-center mb-6 relative z-10">
+                  <h2 className="text-2xl md:text-3xl font-serif text-[#241943] text-center mb-6 relative z-10 font-bold">
                     Get Inspired
                   </h2>
 
@@ -141,13 +141,13 @@ export default function Home() {
 
         {/* What's Happening Section */}
         <section className="max-w-5xl mx-auto px-4 py-8 mb-12">
-          <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8">What's Happening</h2>
+          <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8 font-bold">What's Happening</h2>
           <EventCarousel />
         </section>
 
         {/* Book Recommends Section */}
-        <section className="max-w-5xl mx-auto px-4 py-8">
-          <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8">Book Recommends</h2>
+        <section className="max-w-5xl mx-auto px-4 py-8 mb-12 overflow-x-hidden overflow-y-visible">
+          <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8 font-bold">Book Recommends</h2>
           <BookCarousel />
         </section>
 
