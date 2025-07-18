@@ -4,11 +4,11 @@ import Link from "next/link"
 const Navbar = () => {
   const navItems = [
     { href: "/", label: "Home" },
+    { href: "/about-us", label: "About Us" },
     { href: "/events", label: "Events" },
     { href: "/club", label: "Club" },
-    { href: "/join-us", label: "Join Us" },
     { href: "/writers", label: "Writers" },
-    { href: "/about-us", label: "About Us" },
+    { href: "/join-us", label: "Join Us" },
     { href: "/profile", label: "Profile" },
   ]
 
