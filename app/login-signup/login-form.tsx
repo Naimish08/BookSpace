@@ -82,7 +82,10 @@ export default function Component() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#fde8be" }}>
-      <div className="w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl" style={{ backgroundColor: "#462C90" }}>
+      <div 
+        className="w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl" 
+        style={{ backgroundColor: activeTab === "signin" ? "#704CAA" : "#462C90" }}
+      >
         <div className="flex flex-col lg:flex-row min-h-[600px]">
           {/* Left side - Illustration */}
           <div className="lg:w-1/2 p-8 flex items-center justify-center">
