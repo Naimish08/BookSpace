@@ -8,8 +8,8 @@ clone this repository `git clone https://github.com/Shabbyrox/BookSpace.git` in 
 Run the following commands to install required dependencies
 
 - `npx generate prisma`
-- `npm install`
-- `npm install tailwindcss`
+- `pnpm install`
+- `pnpm install tailwindcss`
 
 if you get npm errors, chances are that the dependencies might already be installed.
 
