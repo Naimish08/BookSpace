@@ -7,12 +7,12 @@ export default function Writers() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "vision":
-        return "Lorem ipsum dolor sit amet, consectetur adipiscing elit...";
-      case "mission":
-        return "Our mission is to foster reading culture and empower youth...";
-      case "purpose":
-        return "We aim to make books accessible and education equitable...";
+      case "FORMAT":
+        return "Feel free to unleash your creative forces and let the flow of writing take you on a literary journey. There are few things we would love to hear from you. You can check that out on the google form before writing your blog. We ask you for your social media account where you showcase your creativity so readers can connect with you. Personal information like hobbies or passion can be added if you want readers to connect with you on a deeper level.";
+      case "CONTENT":
+        return "The purpose of this blog is to bring forth personal stories and original, strategic ideas to be a platform where each member can voice out themselves. The content may be anything as long as it is something you like. You can share something you like, you’re good at or anything that you would like to share with readers.";
+      case "CRITERIA":
+        return "Any blog above 300 words and below 2000 words is considered. We encourage original writing that is AI- free. We also encourage profanity-free writing that is free of vulgarity. If you’re article is within the criteria, we will reach out to you within 2 weeks for confirmation.";
       default:
         return "";
     }

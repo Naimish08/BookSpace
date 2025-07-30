@@ -8,11 +8,11 @@ export default function AboutUs() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "vision":
-        return "Lorem ipsum dolor sit amet, consectetur adipiscing elit...";
+        return "As automation and technology govern our life, reading takes a backseat. Our vision is to gift back the habit of reading to those who’ve lost reading and to ignite the fire in youth to gift literacy to those who aren’t fortunate enough to have access to it.";
       case "mission":
-        return "Our mission is to foster reading culture and empower youth...";
+        return "Our Mission is to keep the love of books alive- being a medium where readers connect with each other and to create a virtual world where reading is alive and breathing. We encourage reading with sustainability- choosing sharing over buying. We aim to make the youth aware of illiteracy in India and the World and empower them to harness it.";
       case "purpose":
-        return "We aim to make books accessible and education equitable...";
+        return "BookSpace originated as a close-knit committee in Mumbai where readers can share books with each other for free as available in the BookSpace Library. We extend our purpose to be a warm place for readers where collaborations, book discussions, and progressive steps in the world of literature can thrive.";
       default:
         return "";
     }
@@ -105,8 +105,10 @@ export default function AboutUs() {
         </h2>
         <div className="bg-[#B9745A] rounded-[30px] px-6 py-6 w-full lg:w-[60%] text-left text-white shadow-md relative">
           <p className="mb-4 text-lg md:text-xl font-semibold">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore
+            The urge to read one book today turns into 10 books by few days.
+            To read each book do I have to buy a book? Oh, but this book is with a friend’s friend’s friend.
+            What are the chances I know? Very low. Being in this dilemma, rose the question- why don’t we have a community where books every member has is listed on the community library and can be borrowed by anyone from the community.
+            This was the creation of BookSpace- 1+1 is more than 2.
           </p>
           <div className="relative flex flex-col items-center">
             <img
