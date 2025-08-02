@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { createClient } from "@/utils/superbase/client";
 import { PrismaClient } from "@/lib/generated/prisma";
+import { useRouter } from "next/navigation";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("signup");
@@ -23,6 +24,7 @@ export default function Component() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const supabase = createClient();
+  const router = useRouter();
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -49,7 +51,7 @@ export default function Component() {
         setLoading(false);
         return;
       }
-      console.log("Hello 1");
+      // console.log("Hello 1");
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -61,7 +63,7 @@ export default function Component() {
           },
         },
       });
-      console.log("Hello 2");
+      // console.log("Hello 2");
 
       if (error) {
         setError(error.message);
@@ -96,11 +98,17 @@ export default function Component() {
       }
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: form.username, // allow username as email for now
+        email: form.email,
         password: form.password,
       });
-      if (error) setError(error.message);
-      else setSuccess("Login successful!");
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess("Login successful!");
+        setTimeout(() => {
+          router.push("/profile");
+        }, 1000);
+      }
     }
     setLoading(false);
   };
@@ -109,11 +117,28 @@ export default function Component() {
     setError("");
     setSuccess("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
-    if (error) setError(error.message);
-    setLoading(false);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,  
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+      
+      if (error) {
+        setError(error.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Failed to sign in with Google");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -232,9 +257,9 @@ export default function Component() {
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4 mb-6">
                   <Input
-                    placeholder="Username *"
-                    name="username"
-                    value={form.username}
+                    placeholder="Email *"
+                    name="email"
+                    value={form.email}
                     onChange={handleChange}
                     className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
                   />
