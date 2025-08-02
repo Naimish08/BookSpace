@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-//import { useSession, signOut } from "next-auth/react";
+// import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,7 +17,7 @@ export default function Header() {
     { href: "/writers", label: "Writers" },
     { href: "/about-us", label: "About Us" },
     { href: "/login-signup", label: "Sign in" },
-    { href: "/profile", label: "Profile" },
+    { href: "/profile-page", label: "Profile" },
   ];
 
   return (
