@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export default function Footer() {
   return (
     <footer
-      className="relative text-white pt-10 pb-24 mt-16 font-sans bg-[#ba7fcb] bg-[url('/footer-bg.png')] bg-repeat-x bg-[position:bottom_1.5rem_center] bg-contain"
+      className="relative text-white pt-10 pb-24 mt-16 font-sans bg-[#ba7fcb] bg-[url('/footer-bg.png')] bg-repeat-x bg-[position:bottom_1.5rem_center] bg-[length:auto_4rem] sm:bg-[length:auto_6rem] md:bg-contain"
     >
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 text-center md:text-left">

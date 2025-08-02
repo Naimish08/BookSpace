@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -12,4 +6,136 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
+model User {
+  id               String            @id @default(uuid()) @db.Uuid
+  username         String?           @unique
+  name             String?
+  email            String?
+  age              Int?
+  occupation       String?
+  address          String?
+  bio              String?
+  genres           String[]          @default([])
+  created_at       DateTime          @default(now())
+  badges           Badge[]
+  bookDiaries      BookDiary[]
+  bookExchanges    BookExchange[]
+  bookspaceProfile BookspaceProfile?
+}
+
+model BookspaceProfile {
+  user_id         String   @id @db.Uuid
+  bio             String
+  current_read    String?  @db.Uuid
+  views           Int      @default(0)
+  reads           Int      @default(0)
+  connection      String[] @db.Uuid
+  streak_calendar Json?    @db.Json
+  currentBook     Book?    @relation(fields: [current_read], references: [id])
+  user            User     @relation(fields: [user_id], references: [id])
+}
+
+model Book {
+  id               String             @id @default(uuid()) @db.Uuid
+  name             String
+  author           String
+  genre            String
+  image            String
+  created_at       DateTime           @default(now())
+  bookDiaries      BookDiary[]
+  bookExchanges    BookExchange[]
+  bookRecommends   BookRecommend[]
+  BookspaceProfile BookspaceProfile[]
+  monthlyReads     MonthlyRead[]
+}
+
+model BookDiary {
+  id          String    @id @default(uuid()) @db.Uuid
+  user_id     String    @db.Uuid
+  book_id     String    @db.Uuid
+  type        String    @db.VarChar
+  start_date  DateTime?
+  end_date    DateTime?
+  description String?
+  book        Book      @relation(fields: [book_id], references: [id])
+  user        User      @relation(fields: [user_id], references: [id])
+}
+
+model BookExchange {
+  id       String  @id @default(uuid()) @db.Uuid
+  user_id  String  @db.Uuid
+  book_id  String  @db.Uuid
+  feedback String?
+  status   String  @default("pending")
+  book     Book    @relation(fields: [book_id], references: [id])
+  user     User    @relation(fields: [user_id], references: [id])
+}
+
+model Badge {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  name       String
+  awarded_on DateTime
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+model MonthlyRead {
+  id            String  @id @default(uuid()) @db.Uuid
+  book_id       String  @db.Uuid
+  month         String
+  type          String
+  progress      Int
+  highest_rated Boolean @default(false)
+  book          Book    @relation(fields: [book_id], references: [id])
+}
+
+model BookRecommend {
+  id          String  @id @default(uuid()) @db.Uuid
+  book_id     String  @db.Uuid
+  description String
+  weekly_read Boolean @default(false)
+  link        String
+  book        Book    @relation(fields: [book_id], references: [id])
+}
+
+model Suggestion {
+  id         String @id @default(uuid()) @db.Uuid
+  name       String
+  email      String
+  contact_no String
+  idea       String
+}
+
+model Impact {
+  id                String @id @default(uuid()) @db.Uuid
+  books_donated     Int    @default(0)
+  children_educated Int    @default(0)
+  active_users      Int    @default(0)
+}
+
+model TeamMember {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  image       String
+  team        String
+  designation String
+}
+
+model Event {
+  id          String   @id @default(uuid()) @db.Uuid
+  event_name  String
+  description String
+  venue       String
+  time        DateTime
+  image       String
+  blog_link   String
+}
+
+model Blog {
+  id   String @id @default(uuid()) @db.Uuid
+  link String
+}
+
