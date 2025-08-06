@@ -1,14 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { createClient } from "@/utils/superbase/client";
+import { PrismaClient } from "@/lib/generated/prisma";
+import { useRouter } from "next/navigation";
 
 export default function Component() {
-  const [activeTab, setActiveTab] = useState("signup")
+  const [activeTab, setActiveTab] = useState("signup");
   const [form, setForm] = useState({
     username: "",
     name: "",
@@ -22,6 +24,7 @@ export default function Component() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const supabase = createClient();
+  const router = useRouter();
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -36,6 +39,7 @@ export default function Component() {
     setError("");
     setSuccess("");
     setLoading(true);
+
     if (activeTab === "signup") {
       if (form.password !== form.confirmPassword) {
         setError("Passwords do not match");
@@ -47,6 +51,7 @@ export default function Component() {
         setLoading(false);
         return;
       }
+      // console.log("Hello 1");
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -58,15 +63,52 @@ export default function Component() {
           },
         },
       });
-      if (error) setError(error.message);
-      else setSuccess("Signup successful! Please check your email to verify your account.");
+      // console.log("Hello 2");
+
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
+        try {
+          const response = await fetch("/api/users", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: data.user.id,
+              username: form.username,
+              name: form.name,
+              address: form.city,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to create user in database");
+          }
+
+          setSuccess(
+            "Signup successful! Please check your email to verify your account."
+          );
+        } catch (dbError) {
+          console.error("Database error:", dbError);
+          setError(
+            "Account created but failed to save profile. Please contact support."
+          );
+        }
+      }
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: form.username, // allow username as email for now
+        email: form.email,
         password: form.password,
       });
-      if (error) setError(error.message);
-      else setSuccess("Login successful!");
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess("Login successful!");
+        setTimeout(() => {
+          router.push("/profile");
+        }, 1000);
+      }
     }
     setLoading(false);
   };
@@ -75,40 +117,70 @@ export default function Component() {
     setError("");
     setSuccess("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
-    if (error) setError(error.message);
-    setLoading(false);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,  
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+      
+      if (error) {
+        setError(error.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Failed to sign in with Google");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#fde8be" }}>
-      <div 
-        className="w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl" 
-        style={{ backgroundColor: activeTab === "signin" ? "#704CAA" : "#462C90" }}
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: "#fde8be" }}
+    >
+      <div
+        className="w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl"
+        style={{
+          backgroundColor: activeTab === "signin" ? "#704CAA" : "#462C90",
+        }}
       >
         <div className="flex flex-col lg:flex-row min-h-[600px]">
           {/* Left side - Illustration */}
           <div className="lg:w-1/2 p-8 flex items-center justify-center">
-            <div className="relative">             
-                <div className="text-center">
+            <div className="relative">
+              <div className="text-center">
                 <Image
-                    src="loginphoto.png"
-                    alt="Reading Illustration"
-                    width={557} // or any other dimension
-                    height={314}
-                    /> 
-                </div>
-              
+                  src="loginphoto.png"
+                  alt="Reading Illustration"
+                  width={557} // or any other dimension
+                  height={314}
+                />
+              </div>
             </div>
           </div>
 
           {/* Right side - Form */}
           <div className="lg:w-1/2 p-8 flex flex-col justify-center">
             <div className="max-w-md mx-auto w-full">
-              <h1 className="text-2xl font-semibold text-white text-center mb-8">LOGIN TO CONTINUE</h1>
+              <h1 className="text-2xl font-semibold text-white text-center mb-8">
+                LOGIN TO CONTINUE
+              </h1>
 
               {/* Google Sign In Button */}
-              <Button variant="outline" className="w-full mb-6 bg-white text-gray-700 border-0  py-3 rounded-full" onClick={handleGoogle} disabled={loading}>
+              <Button
+                variant="outline"
+                className="w-full mb-6 bg-white text-gray-700 border-0  py-3 rounded-full"
+                onClick={handleGoogle}
+                disabled={loading}
+              >
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -140,23 +212,33 @@ export default function Component() {
               {/* Tab Buttons */}
               <div className="flex mb-6 rounded-full overflow-hidden">
                 <button
-                  onClick={() => { setActiveTab("signup"); setError(""); setSuccess(""); }}
+                  onClick={() => {
+                    setActiveTab("signup");
+                    setError("");
+                    setSuccess("");
+                  }}
                   className={`flex-1 py-3 px-6 text-sm font-medium transition-colors ${
                     activeTab === "signup" ? "text-white" : "text-gray-300"
                   }`}
                   style={{
-                    backgroundColor: activeTab === "signup" ? "#220440" : "transparent",
+                    backgroundColor:
+                      activeTab === "signup" ? "#220440" : "transparent",
                   }}
                 >
                   Sign up
                 </button>
                 <button
-                  onClick={() => { setActiveTab("signin"); setError(""); setSuccess(""); }}
+                  onClick={() => {
+                    setActiveTab("signin");
+                    setError("");
+                    setSuccess("");
+                  }}
                   className={`flex-1 py-3 px-6 text-sm font-medium transition-colors ${
                     activeTab === "signin" ? "text-white" : "text-gray-300"
                   }`}
                   style={{
-                    backgroundColor: activeTab === "signin" ? "#220440" : "transparent",
+                    backgroundColor:
+                      activeTab === "signin" ? "#220440" : "transparent",
                   }}
                 >
                   Sign in
@@ -164,16 +246,20 @@ export default function Component() {
               </div>
 
               {/* Error/Success Messages */}
-              {error && <div className="mb-4 text-red-200 text-center">{error}</div>}
-              {success && <div className="mb-4 text-green-200 text-center">{success}</div>}
+              {error && (
+                <div className="mb-4 text-red-200 text-center">{error}</div>
+              )}
+              {success && (
+                <div className="mb-4 text-green-200 text-center">{success}</div>
+              )}
 
               {/* Form Fields */}
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4 mb-6">
                   <Input
-                    placeholder="Username *"
-                    name="username"
-                    value={form.username}
+                    placeholder="Email *"
+                    name="email"
+                    value={form.email}
                     onChange={handleChange}
                     className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
                   />
@@ -238,7 +324,9 @@ export default function Component() {
                       id="terms"
                       name="terms"
                       checked={form.terms}
-                      onCheckedChange={(checked) => setForm((prev) => ({ ...prev, terms: !!checked }))}
+                      onCheckedChange={(checked) =>
+                        setForm((prev) => ({ ...prev, terms: !!checked }))
+                      }
                       className="border-white data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
                     />
                     <label htmlFor="terms" className="text-sm text-white">
@@ -254,7 +342,11 @@ export default function Component() {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? "Please wait..." : activeTab === "signup" ? "Sign up" : "Sign in"}
+                  {loading
+                    ? "Please wait..."
+                    : activeTab === "signup"
+                    ? "Sign up"
+                    : "Sign in"}
                 </Button>
               </form>
             </div>
@@ -262,5 +354,5 @@ export default function Component() {
         </div>
       </div>
     </div>
-  )
+  );
 }
