@@ -1,8 +1,9 @@
 "use client"
 
+import { ChevronDown, Instagram, Facebook, Twitter, Search } from "lucide-react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Instagram, Facebook, Twitter, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import BookFlipAnimation from "@/components/book-flip-animation"
 import ScrollMessage from "@/components/scroll-message"
@@ -30,9 +31,56 @@ export default function Home() {
       className="min-h-screen bg-[#FDE8BE]"
     >
       <main>
-        {/* Welcome Section */}
+        {/* Hero Video Section */}
+        <motion.section 
+          className="relative w-full overflow-hidden"
+          style={{ 
+            height: 'auto',
+            minHeight: '50vh',
+            marginBottom: '0.5rem'
+          }}
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+        >
+          <div className="relative">
+            <video 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              className="w-full object-cover"
+              style={{
+                maxWidth: '100%',
+                // Mobile styles
+                '@media (max-width: 768px)': {
+                  height: '45vh',
+                  marginBottom: '-2px',
+                },
+                // Desktop styles
+                '@media (min-width: 769px)': {
+                  height: '80vh',
+                }
+              }}
+            >
+              <source src="/landingpage.mp4" type="video/mp4" />
+            </video>
+          </div>
+
+          {/* Scroll Indicator */}
+          <motion.div 
+            className="absolute bottom-2 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white flex flex-col items-center cursor-pointer z-10"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <p className="text-sm md:text-lg mb-1 md:mb-2 font-literata text-center px-4">Scroll Below</p>
+            <ChevronDown size={16} className="md:w-6 md:h-6" />
+          </motion.div>
+        </motion.section>
+
+        {/* Search Bar Section */}
         <motion.section className="container mx-auto px-4 py-8" initial="initial" animate="animate" variants={fadeInUp}>
-          {/* Search Bar */}
           <motion.div className="w-full mb-6" variants={fadeIn}>
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#241943]" size={18} />
