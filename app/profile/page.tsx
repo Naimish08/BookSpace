@@ -118,7 +118,6 @@ const ProfileCard = ({ user = { username: "readinglovesme", email: "readingloves
           </span>
         ))}
       </div>
-
       {/* Current Read + Wishlist */}
       <div className="mt-4 flex flex-wrap gap-4 items-center">
         <div className="flex-1">
@@ -506,12 +505,10 @@ export default function ProfilePage() {
     <div className="min-h-screen p-4 sm:p-8" style={{ background: "#FDE8BE" }}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         <ChallengeBanner />
-
         <ProfileCard 
           user={{ username, email, bio: "" }} 
           onSignOut={handleSignOut} 
         />
-
         <RecapSection>
           <h2 className="text-4xl font-bold text-center text-[#483285] mb-8">Monthly Reading Recap</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
