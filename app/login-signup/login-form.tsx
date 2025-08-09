@@ -89,6 +89,9 @@ export default function Component() {
           setSuccess(
             "Signup successful! Please check your email to verify your account."
           );
+          // Store a flag to show onboarding on first login
+          localStorage.setItem('showOnboarding', 'true');
+          router.push('/club');
         } catch (dbError) {
           console.error("Database error:", dbError);
           setError(
@@ -105,8 +108,10 @@ export default function Component() {
         setError(error.message);
       } else {
         setSuccess("Login successful!");
+        // Add this line to show onboarding after login
+        localStorage.setItem('showOnboarding', 'true');
         setTimeout(() => {
-          router.push("/profile");
+          router.push("/club");
         }, 1000);
       }
     }
@@ -132,6 +137,9 @@ export default function Component() {
       
       if (error) {
         setError(error.message);
+      } else {
+        // Add this line to show onboarding after Google login
+        localStorage.setItem('showOnboarding', 'true');
       }
     } catch (error) {
       console.error("Error:", error);
@@ -256,13 +264,6 @@ export default function Component() {
               {/* Form Fields */}
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4 mb-6">
-                  <Input
-                    placeholder="Email *"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                  />
                   {activeTab === "signup" && (
                     <>
                       <Input
@@ -272,14 +273,18 @@ export default function Component() {
                         onChange={handleChange}
                         className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
                       />
-                      <Input
-                        placeholder="E-Mail *"
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
-                      />
+                    </>
+                  )}
+                  <Input
+                    placeholder="Email *"
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                  />
+                  {activeTab === "signup" && (
+                    <>
                       <Input
                         placeholder="Password *"
                         type="password"

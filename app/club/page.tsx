@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { User, Instagram, Youtube, Twitter, Globe, Plus, Minus, BookOpen, Target, Calendar, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import BookCarousel from "@/components/book-carousel"
 import Image from "next/image"
+import {OnboardingModal} from "@/components/onboarding-modal"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -99,6 +100,9 @@ export default function Component() {
     }
   ])
 
+  // Update the showOnboarding state declaration
+  const [showOnboarding, setShowOnboarding] = useState(true); // Always show on refresh for testing
+
   // Functions
   const updateProgress = (type, change) => {
     if (type === 'fiction') {
@@ -165,6 +169,33 @@ export default function Component() {
       }
       return book
     }))
+  }
+
+  // Update handleOnboardingComplete to not use localStorage for now
+  const handleOnboardingComplete = (answers) => {
+    // Update reading preferences
+    if (answers.step1) {
+      console.log('Interests:', answers.step1);
+    }
+    
+    if (answers.step2_fiction && answers.step2_nonFiction) {
+      setYearlyGoals(prev => ({
+        ...prev,
+        fictionTarget: parseInt(answers.step2_fiction),
+        nonFictionTarget: parseInt(answers.step2_nonFiction)
+      }));
+    }
+    
+    if (answers.step3) {
+      const minutes = parseInt(answers.step3.split(' ')[0]);
+      setDailyReadingGoal(minutes);
+    }
+    
+    if (answers.step4) {
+      console.log('Preferred reading time:', answers.step4);
+    }
+    
+    setShowOnboarding(false);
   }
 
   return (
@@ -334,6 +365,7 @@ export default function Component() {
                           <Image
                             src={book.coverImage}
                             alt={book.title}
+                            
                             width={80}
                             height={120}
                             className="rounded-md shadow-lg"
@@ -575,6 +607,13 @@ export default function Component() {
           scrollbar-width: none;
         }
       `}</style>
+
+      {/* Onboarding Modal - Add this at the end of your return statement */}
+      <OnboardingModal 
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+      />
     </div>
   )
 }

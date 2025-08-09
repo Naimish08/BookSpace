@@ -15,7 +15,24 @@ import Image from 'next/image';
 import { Calendar } from "@/components/ui/calendar";
 
 // ProfileCard Component with Tailwind CSS
-const ProfileCard = ({ user = { username: "readinglovesme", email: "readinglovesme@gmail.com", bio: "(bio)" } }) => {
+const ProfileCard = ({ user = { username: "readinglovesme", email: "readinglovesme@gmail.com", bio: "(bio)" }, onSignOut }) => {
+  const router = useRouter()
+  const supabase = createClient()
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error("Error signing out:", error.message)
+      } else {
+        console.log("Successfully signed out")
+        router.push("/") // Changed from "/login-signup" to "/"
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error)
+    }
+  }
+
   const [bio, setBio] = useState(user.bio || localStorage.getItem("savedBio") || "(bio)");
   const [isEditing, setIsEditing] = useState(false);
   const [currentRead, setCurrentRead] = useState("Book Title");
@@ -36,12 +53,20 @@ const ProfileCard = ({ user = { username: "readinglovesme", email: "readingloves
       {/* Header */}
       <div className="flex justify-between items-center border-b border-white/30 pb-3">
         <h2 className="text-xl font-semibold">📖 My BookSpace Profile</h2>
-        <button
-          className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
-          onClick={handleEditClick}
-        >
-          Edit
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
+            onClick={handleEditClick}
+          >
+            Edit
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transition"
+            onClick={handleSignOut}
+          >
+            Log Out
+          </button>
+        </div>
       </div>
 
       {/* Username + Avatar + Bio */}
@@ -93,7 +118,6 @@ const ProfileCard = ({ user = { username: "readinglovesme", email: "readingloves
           </span>
         ))}
       </div>
-
       {/* Current Read + Wishlist */}
       <div className="mt-4 flex flex-wrap gap-4 items-center">
         <div className="flex-1">
@@ -447,14 +471,15 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) console.error("Error signing out:", error.message);
-      else {
-        console.log("Successfully signed out");
-        router.push("/login-signup");
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error("Error signing out:", error.message)
+      } else {
+        console.log("Successfully signed out")
+        router.push("/") // Changed from "/login-signup" to "/"
       }
     } catch (error) {
-      console.error("Unexpected error during sign out:", error);
+      console.error("Unexpected error during sign out:", error)
     }
   };
 
@@ -480,9 +505,10 @@ export default function ProfilePage() {
     <div className="min-h-screen p-4 sm:p-8" style={{ background: "#FDE8BE" }}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         <ChallengeBanner />
-
-        <ProfileCard user={{ username, email, bio: "" }} />
-
+        <ProfileCard 
+          user={{ username, email, bio: "" }} 
+          onSignOut={handleSignOut} 
+        />
         <RecapSection>
           <h2 className="text-4xl font-bold text-center text-[#483285] mb-8">Monthly Reading Recap</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
