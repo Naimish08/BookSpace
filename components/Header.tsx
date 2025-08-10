@@ -4,11 +4,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-<<<<<<< HEAD
-=======
 import { createClient } from "@/utils/superbase/client";
 import { User } from "@supabase/supabase-js";
->>>>>>> 4bb6139515b60fdd4ae80936489e8d5f0270dfc5
 // import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
@@ -45,16 +42,11 @@ export default function Header() {
     { href: "/join-us", label: "Join Us" },
     { href: "/writers", label: "Writers" },
     { href: "/about-us", label: "About Us" },
-<<<<<<< HEAD
-    { href: "/login-signup", label: "Sign in" },
-    { href: "/profile-page", label: "Profile" },
-=======
->>>>>>> 4bb6139515b60fdd4ae80936489e8d5f0270dfc5
   ];
 
   const links = user
     ? [...baseLinks, { href: "/profile", label: "Profile" }]
-    : [...baseLinks, { href: "/login-signup", label: "Sign in" }];
+    : [...baseLinks,{ href: "/login-signup", label: "Sign in" }];
 
   return (
     <header className="container mx-auto py-4 px-4">

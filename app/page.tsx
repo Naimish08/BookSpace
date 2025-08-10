@@ -185,7 +185,7 @@ export default function Home() {
                 <h3 className="text-2xl font-serif text-[#5d4037] mb-2">WE ARE CURRENTLY READING</h3>
                 <p className="text-[#5d4037] mb-4">Dive into the mystery and uncover secrets together!</p>
                 <p className="text-[#a87c9f] font-medium mb-4">Book Discussion: 3/03/2025</p>
-                <Button className="bg-[#241943] text-[#E1B5EE] hover:bg-[#E1B5EE] hover:text-[#241943] transition-colors" onClick={() => window.open("/BookClub", "_blank")}>Explore</Button>
+                <Button className="bg-[#241943] text-[#E1B5EE] hover:bg-[#E1B5EE] hover:text-[#241943] transition-colors" onClick={() => window.open("/club", "_blank")}>Explore</Button>
               </div>
             </div>
           </div>
