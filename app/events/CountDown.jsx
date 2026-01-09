@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import PropTypes from 'prop-types';
-
 function Countdown({ targetDate }) {
   // State to store remaining time
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
@@ -11,7 +9,7 @@ function Countdown({ targetDate }) {
     const difference = new Date(targetDate).getTime() - new Date().getTime();
 
     if (difference <= 0) {
-      return { totalDays:0,totalHours: 0, minutes: 0, seconds: 0 };
+      return { totalDays: 0, totalHours: 0, minutes: 0, seconds: 0 };
     }
 
     // Total hours left including days
@@ -63,13 +61,6 @@ const styles = {
     fontSize: 36,
     color: '#FF4C4C',
   },
-};
-
-Countdown.propTypes = {
-  targetDate: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.instanceOf(Date),
-  ]).isRequired,
 };
 
 export default Countdown;
