@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export default function Footer() {
   return (
     <footer
-      className="relative text-white pt-10 pb-24 mt-16 font-sans bg-[#ba7fcb] bg-[url('/footer-bg.png')] bg-repeat-x bg-[position:bottom_1.5rem_center] bg-[length:auto_4rem] sm:bg-[length:auto_6rem] md:bg-contain"
+      className="relative text-white pt-10 pb-24 font-sans bg-[#ba7fcb] bg-[url('/footer-bg.png')] bg-repeat-x bg-[position:bottom_1.5rem_center] bg-[length:auto_4rem] sm:bg-[length:auto_6rem] md:bg-contain"
     >
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 text-center md:text-left">
@@ -56,49 +56,49 @@ export default function Footer() {
             </form>
 
             {/* Socials */}
-<div className="mt-6 flex flex-col items-center md:items-start gap-2">
-  {/* Email with emoji */}
-  <a
-    href="mailto:bookspaceconnect@gmail.com"
-    className="text-sm hover:text-gray-100 flex items-center gap-1"
-    target="_blank"
-  >
-    <span role="img" aria-label="email">📧</span> bookspaceconnect@gmail.com
-  </a>
+            <div className="mt-6 flex flex-col items-center md:items-start gap-2">
+              {/* Email with emoji */}
+              <a
+                href="mailto:bookspaceconnect@gmail.com"
+                className="text-sm hover:text-gray-100 flex items-center gap-1"
+                target="_blank"
+              >
+                <span role="img" aria-label="email">📧</span> bookspaceconnect@gmail.com
+              </a>
 
-  {/* Social icons */}
-  <div className="flex gap-4 mt-2">
-    <a
-      href="https://www.instagram.com/bookspace__"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-gray-200"
-    >
-      <Instagram size={20} />
-    </a>
-    <a
-      href="https://linkedin.com/in/bookspace"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-gray-200"
-    >
-      <Linkedin size={20} />
-    </a>
-    <a
-      href="https://medium.com/@bookspace"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-gray-200"
-    >
-      <Image
-        src="/medium-logo2.png"
-        alt="Medium"
-        width={25}
-        height={25}
-      />
-    </a>
-  </div>
-</div>
+              {/* Social icons */}
+              <div className="flex gap-4 mt-2">
+                <a
+                  href="https://www.instagram.com/bookspace__"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-200"
+                >
+                  <Instagram size={20} />
+                </a>
+                <a
+                  href="https://linkedin.com/in/bookspace"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-200"
+                >
+                  <Linkedin size={20} />
+                </a>
+                <a
+                  href="https://medium.com/@bookspace"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-200"
+                >
+                  <Image
+                    src="/medium-logo2.png"
+                    alt="Medium"
+                    width={25}
+                    height={25}
+                  />
+                </a>
+              </div>
+            </div>
 
           </div>
         </div>

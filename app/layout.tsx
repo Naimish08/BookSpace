@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   title: "BookSpace",
   description: "A community where readers and books are celebrated",
   generator: "BookSpace Team",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
