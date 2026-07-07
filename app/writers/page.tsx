@@ -96,11 +96,9 @@ export default function Writers() {
               </div>
             </div>
             <a
-              href="https://medium.com/@bookspace/latest"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 bg-gradient-to-r from-[#B9745A] to-[#945D49] text-white px-8 py-3 rounded-full font-bold shadow-lg 
-                hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 
+              href="/blogs"
+              className="mt-6 bg-gradient-to-r from-[#B9745A] to-[#945D49] text-white px-8 py-3 rounded-full font-bold shadow-lg
+                hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300
                 flex items-center justify-center gap-3 group w-full sm:w-auto sm:self-start"
             >
               <span>Read Latest Blog</span>
@@ -138,11 +136,9 @@ export default function Writers() {
               </div>
 
               <a
-                href="https://medium.com/@bookspace"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 bg-[#FDE8BE] text-[#311E17] px-8 py-3 rounded-full font-bold shadow-lg 
-                  hover:bg-white hover:shadow-xl transition-all duration-300 
+                href="/blogs"
+                className="mt-6 bg-[#FDE8BE] text-[#311E17] px-8 py-3 rounded-full font-bold shadow-lg
+                  hover:bg-white hover:shadow-xl transition-all duration-300
                   flex items-center justify-center gap-3 group relative z-10 w-full sm:w-auto sm:self-start"
               >
                 <span>Visit Our Blog</span>
@@ -182,12 +178,12 @@ export default function Writers() {
                   ✨ Write Your Blog With Us Today ✨
                 </h3>
                 <a
-                  href="mailto:bookspaceconnect@gmail.com"
+                  href="/blogs/create"
                   className="inline-flex items-center gap-2 font-medium text-[#361313] text-lg hover:text-[#AC6F59] transition-all duration-300 group"
                 >
-                  <span className="text-xl group-hover:scale-110 transition-transform">📧</span>
+                  <span className="text-xl group-hover:scale-110 transition-transform">✍️</span>
                   <span className="border-b-2 border-transparent group-hover:border-[#AC6F59] transition-all duration-300">
-                    bookspaceconnect@gmail.com
+                    Start writing your blog
                   </span>
                 </a>
               </div>
@@ -262,23 +258,21 @@ export default function Writers() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://medium.com/@bookspace"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-[#FDE8BE] text-[#311E17] px-8 py-3 rounded-full font-bold shadow-lg 
-                hover:bg-white hover:shadow-xl transition-all duration-300 
+              href="/blogs"
+              className="bg-[#FDE8BE] text-[#311E17] px-8 py-3 rounded-full font-bold shadow-lg
+                hover:bg-white hover:shadow-xl transition-all duration-300
                 flex items-center justify-center gap-2 group"
             >
               <span>Explore Our Blog</span>
               <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
             </a>
             <a
-              href="mailto:bookspaceconnect@gmail.com"
-              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-bold 
-                hover:bg-white hover:text-[#945D49] transition-all duration-300 
+              href="/blogs/create"
+              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-bold
+                hover:bg-white hover:text-[#945D49] transition-all duration-300
                 flex items-center justify-center gap-2"
             >
-              <span>✉️</span>
+              <span>✍️</span>
               <span>Start Writing</span>
             </a>
           </div>

@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -7,6 +7,7 @@ import { User, Instagram, Youtube, Twitter, Globe, Plus, Minus, BookOpen, Target
 import BookCarousel from "@/components/book-carousel"
 import Image from "next/image"
 import {OnboardingModal} from "@/components/onboarding-modal"
+import { createClient } from "@/utils/superbase/client"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -101,7 +102,43 @@ export default function Component() {
   ])
 
   // Update the showOnboarding state declaration
-  const [showOnboarding, setShowOnboarding] = useState(true); // Always show on refresh for testing
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient();
+
+  // Check auth and onboarding status
+  useEffect(() => {
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+        // Show onboarding only on first visit after signup
+        const onboardingDone = localStorage.getItem(`onboarding_done_${session.user.id}`);
+        if (!onboardingDone && localStorage.getItem('showOnboarding') === 'true') {
+          setShowOnboarding(true);
+        }
+        // Fetch streak from API
+        try {
+          const res = await fetch(`/api/streak?userId=${session.user.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setReadingStreak(data.currentStreak || 0);
+          }
+        } catch (e) { console.error('Failed to fetch streak:', e); }
+        // Fetch badges
+        try {
+          const res = await fetch(`/api/badges?userId=${session.user.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setEarnedBadges(data.allBadges || []);
+          }
+        } catch (e) { console.error('Failed to fetch badges:', e); }
+      }
+    };
+    init();
+  }, []);
+
+  const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
 
   // Functions
   const updateProgress = (type, change) => {
@@ -136,11 +173,31 @@ export default function Component() {
     }))
   }
 
-  const markDailyReading = () => {
+  const markDailyReading = async () => {
     const newProgress = Math.min(dailyReadingGoal, todayProgress + 15)
     setTodayProgress(newProgress)
     if (newProgress >= dailyReadingGoal && todayProgress < dailyReadingGoal) {
       setReadingStreak(prev => prev + 1)
+    }
+    // Persist streak to API
+    if (userId) {
+      try {
+        const res = await fetch('/api/streak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setReadingStreak(data.currentStreak || 0);
+        }
+        // Also check for new badges
+        await fetch('/api/badges/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+      } catch (e) { console.error('Failed to log streak:', e); }
     }
   }
 
@@ -171,28 +228,49 @@ export default function Component() {
     }))
   }
 
-  // Update handleOnboardingComplete to not use localStorage for now
-  const handleOnboardingComplete = (answers) => {
-    // Update reading preferences
-    if (answers.step1) {
-      console.log('Interests:', answers.step1);
-    }
+  // Fixed handleOnboardingComplete to match modal answer keys
+  const handleOnboardingComplete = async (answers: any) => {
+    // step1 = interests (string[])
+    // step2 = genres (string[])
+    // step3_fiction = fiction target
+    // step3_nonFiction = nonFiction target
+    // step4 = daily reading time (e.g. "30 mins")
+    // step5 = preferred reading time
     
-    if (answers.step2_fiction && answers.step2_nonFiction) {
+    if (answers.step3_fiction && answers.step3_nonFiction) {
       setYearlyGoals(prev => ({
         ...prev,
-        fictionTarget: parseInt(answers.step2_fiction),
-        nonFictionTarget: parseInt(answers.step2_nonFiction)
+        fictionTarget: parseInt(answers.step3_fiction) || prev.fictionTarget,
+        nonFictionTarget: parseInt(answers.step3_nonFiction) || prev.nonFictionTarget
       }));
     }
     
-    if (answers.step3) {
-      const minutes = parseInt(answers.step3.split(' ')[0]);
-      setDailyReadingGoal(minutes);
-    }
-    
     if (answers.step4) {
-      console.log('Preferred reading time:', answers.step4);
+      const minutes = parseInt(answers.step4.split(' ')[0]);
+      if (!isNaN(minutes)) setDailyReadingGoal(minutes);
+    }
+
+    // Persist to database
+    if (userId) {
+      try {
+        await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            interests: answers.step1 || [],
+            genres: answers.step2 || [],
+            fictionTarget: parseInt(answers.step3_fiction) || 12,
+            nonFictionTarget: parseInt(answers.step3_nonFiction) || 8,
+            dailyReadingTime: answers.step4 || '30 mins',
+            preferredTime: answers.step5 || 'Flexible'
+          })
+        });
+        localStorage.setItem(`onboarding_done_${userId}`, 'true');
+        localStorage.removeItem('showOnboarding');
+      } catch (e) {
+        console.error('Failed to persist onboarding:', e);
+      }
     }
     
     setShowOnboarding(false);

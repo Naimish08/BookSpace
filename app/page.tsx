@@ -1,7 +1,7 @@
 "use client"
 
-import { ChevronDown, Instagram, Facebook, Twitter, Search } from "lucide-react"
-import { useEffect, useState } from "react"
+import { ChevronDown, Instagram, Facebook, Twitter, Search, BookOpen, User, FileText } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,8 @@ import BookFlipAnimation from "@/components/book-flip-animation"
 import ScrollMessage from "@/components/scroll-message"
 import BookCarousel from "@/components/book-carousel"
 import EventCarousel from "@/components/event-carousel"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { useDebounce } from "@/hooks/useDebounce"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -22,6 +23,49 @@ const fadeIn = {
 }
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<{ books: any[]; users: any[]; blogs: any[] }>({ books: [], users: [], blogs: [] })
+  const [isSearching, setIsSearching] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const debouncedQuery = useDebounce(searchQuery, 300)
+
+  useEffect(() => {
+    if (debouncedQuery.trim().length < 2) {
+      setSearchResults({ books: [], users: [], blogs: [] })
+      setShowResults(false)
+      return
+    }
+    const fetchResults = async () => {
+      setIsSearching(true)
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&type=all`)
+        if (res.ok) {
+          const data = await res.json()
+          setSearchResults(data)
+          setShowResults(true)
+        }
+      } catch (err) {
+        console.error('Search failed:', err)
+      } finally {
+        setIsSearching(false)
+      }
+    }
+    fetchResults()
+  }, [debouncedQuery])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const hasResults = searchResults.books.length > 0 || searchResults.users.length > 0 || searchResults.blogs.length > 0
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -82,13 +126,92 @@ export default function Home() {
         {/* Search Bar Section */}
         <motion.section className="container mx-auto px-4 py-8" initial="initial" animate="animate" variants={fadeInUp}>
           <motion.div className="w-full mb-6" variants={fadeIn}>
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#241943]" size={18} />
+            <div className="relative w-full" ref={searchRef}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#241943] z-10" size={18} />
               <input
                 type="text"
                 placeholder="Search username or Book Name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => hasResults && setShowResults(true)}
                 className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 bg-[#BA7FCB] text-[#241943] placeholder-[#241943] focus:outline-none focus:ring-2 focus:ring-[#a87c9f]"
               />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-[#241943] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {/* Search Results Dropdown */}
+              <AnimatePresence>
+                {showResults && hasResults && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-[#E1B5EE] z-50 max-h-[400px] overflow-y-auto"
+                  >
+                    {searchResults.books.length > 0 && (
+                      <div className="p-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
+                          <BookOpen size={14} /> Books
+                        </div>
+                        {searchResults.books.map((book: any) => (
+                          <div key={book.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F3E8FF] cursor-pointer transition-colors">
+                            <div className="w-8 h-10 bg-[#E1B5EE] rounded flex items-center justify-center text-xs font-bold text-[#462C90]">
+                              {book.name?.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-[#241943]">{book.name}</p>
+                              <p className="text-xs text-[#BA7FCB]">{book.author} · {book.genre}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.users.length > 0 && (
+                      <div className="p-3 border-t border-[#E1B5EE]">
+                        <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
+                          <User size={14} /> Users
+                        </div>
+                        {searchResults.users.map((user: any) => (
+                          <Link key={user.id} href={`/profile?userId=${user.id}`}>
+                            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F3E8FF] cursor-pointer transition-colors">
+                              <div className="w-8 h-8 bg-[#BA7FCB] rounded-full flex items-center justify-center text-xs font-bold text-white">
+                                {user.username?.charAt(0)?.toUpperCase() || '?'}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-[#241943]">{user.username || user.name}</p>
+                                <p className="text-xs text-gray-500">{user.email}</p>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.blogs.length > 0 && (
+                      <div className="p-3 border-t border-[#E1B5EE]">
+                        <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
+                          <FileText size={14} /> Blog Posts
+                        </div>
+                        {searchResults.blogs.map((blog: any) => (
+                          <Link key={blog.id} href={`/blogs/${blog.id}`}>
+                            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F3E8FF] cursor-pointer transition-colors">
+                              <div className="w-8 h-8 bg-[#462C90] rounded flex items-center justify-center text-xs font-bold text-white">
+                                ✍️
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-[#241943]">{blog.title}</p>
+                                <p className="text-xs text-gray-500 line-clamp-1">{blog.excerpt || blog.content?.substring(0, 60)}</p>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 

@@ -41,11 +41,12 @@ export default function Header() {
     { href: "/club", label: "Club" },
     { href: "/join-us", label: "Join Us" },
     { href: "/writers", label: "Writers" },
+    { href: "/blogs", label: "Blogs" },
     { href: "/about-us", label: "About Us" },
   ];
 
   const links = user
-    ? [...baseLinks, { href: "/profile", label: "Profile" }]
+    ? [...baseLinks, { href: "/chat", label: "Chat" }, { href: "/profile", label: "Profile" }]
     : [...baseLinks,{ href: "/login-signup", label: "Sign in" }];
 
   return (

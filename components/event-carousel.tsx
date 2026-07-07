@@ -5,62 +5,51 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const books = [
-	{
-		id: 1,
-		title: "Book Review Show",
-		image: "/bookreview.png",
-		link: "/link",
-	},
-	{
-		id: 2,
-		title: "BookSpace",
-		subtitle: "Book Exchange • Blind Date with a Book",
-		date: "14th Feb",
-		description: "International Event during Day Special",
-		image: "/bookexchange.png",
-		link: "https://example.com/bookspace",
-	},
-	{
-		id: 3,
-		title: "Book Drive",
-		subtitle: "Literacy Drive",
-		image: "/literacydrive.png",
-		color: "#ffd166",
-		link: "https://example.com/bookdrive",
-	},
-	{
-		id: 4,
-		title: "Event4",
-		subtitle: "Event4",
-		date: "NAN",
-		description: "NAN",
-		image: "/placeholder.svg",
-		link: "https://example.com/bookspace",
-	},
-	{
-		id: 5,
-		title: "Event5",
-		subtitle: "Event5",
-		date: "NAN",
-		description: "NAN",
-		image: "/placeholder.svg",
-		link: "https://example.com/bookspace",
-	},
-	{
-		id: 6,
-		title: "Event6",
-		subtitle: "Event6",
-		date: "NAN",
-		description: "NAN",
-		image: "/placeholder.svg",
-		link: "https://example.com/bookspace",
-	},
+interface ApiEvent {
+	id: string
+	event_name: string
+	description: string
+	venue: string
+	time: string
+	image: string
+	blog_link: string
+	_count?: { participants: number }
+}
+
+// Fallback data shown when the database has no events yet (keeps demos populated)
+const fallbackEvents: ApiEvent[] = [
+	{ id: "fe-1", event_name: "Book Review Show", description: "Community book reviews", venue: "Online", time: "", image: "/bookreview.png", blog_link: "" },
+	{ id: "fe-2", event_name: "Book Exchange", description: "Blind Date with a Book", venue: "Vile Parle", time: "", image: "/bookexchange.png", blog_link: "" },
+	{ id: "fe-3", event_name: "Literacy Drive", description: "Book Donation Drive", venue: "Mumbai", time: "", image: "/literacydrive.png", blog_link: "" },
 ]
 
-export default function BookCarousel() {
+export default function EventCarousel() {
+	const [events, setEvents] = useState<ApiEvent[]>([])
+	const [loaded, setLoaded] = useState(false)
+
+	// Initial fetch from the API
+	useEffect(() => {
+		let active = true
+		fetch("/api/events")
+			.then((res) => (res.ok ? res.json() : { events: [] }))
+			.then((data: { events?: ApiEvent[] }) => {
+				if (!active) return
+				const list = data.events ?? []
+				setEvents(list.length > 0 ? list : fallbackEvents)
+				setLoaded(true)
+			})
+			.catch(() => {
+				if (!active) return
+				setEvents(fallbackEvents)
+				setLoaded(true)
+			})
+		return () => {
+			active = false
+		}
+	}, [])
+
 	const [currentIndex, setCurrentIndex] = useState(0)
-	const maxIndex = Math.ceil(books.length / 3) - 1
+	const maxIndex = Math.max(0, Math.ceil(events.length / 3) - 1)
 	const carouselRef = useRef<HTMLDivElement>(null)
 
 	const goToNext = () => {
@@ -70,6 +59,10 @@ export default function BookCarousel() {
 	const goToPrev = () => {
 		setCurrentIndex((prev) => Math.max(prev - 1, 0))
 	}
+
+	useEffect(() => {
+		setCurrentIndex((prev) => Math.min(prev, maxIndex))
+	}, [maxIndex])
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -85,68 +78,69 @@ export default function BookCarousel() {
 		requestAnimationFrame(handleScroll)
 	}, [currentIndex])
 
+	if (loaded && events.length === 0) {
+		return (
+			<div className="text-center py-10 text-[#241943]">No past events yet.</div>
+		)
+	}
+
+	const formatDate = (time: string) => {
+		if (!time) return ""
+		const d = new Date(time)
+		if (isNaN(d.getTime())) return ""
+		return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+	}
+
 	return (
 		<div className="relative">
 			<div
 				ref={carouselRef}
 				className="flex overflow-x-hidden overflow-y-hidden snap-x snap-mandatory scroll-smooth"
 			>
-				{Array.from({ length: Math.ceil(books.length / 3) }).map((_, pageIndex) => (
+				{Array.from({ length: Math.ceil(events.length / 3) }).map((_, pageIndex) => (
 					<div
 						key={pageIndex}
 						className="min-w-full flex-shrink-0 snap-center grid grid-cols-3 gap-4"
 					>
-						{books
+						{events
 							.slice(pageIndex * 3, pageIndex * 3 + 3)
-							.map((book) => (
-								<a
-									key={book.id}
-									href={book.link}
-									target="_blank"
-									rel="noopener noreferrer"
+							.map((event) => (
+								<div
+									key={event.id}
 									className="rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105"
 								>
-									<div
-										className="w-full h-full bg-[#d1a7c2] rounded-lg"
-										style={{ backgroundColor: book.color || "#d1a7c2" }}
-									>
+									<div className="w-full h-full bg-[#d1a7c2] rounded-lg">
 										<div className="relative aspect-[3/4]">
 											<Image
-												src={book.image || "/placeholder.svg"}
-												alt={book.title}
+												src={event.image || "/placeholder.svg"}
+												alt={event.event_name}
 												fill
 												className="object-cover"
 											/>
 
-											{book.tag && (
-												<div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-													{book.tag}
-												</div>
-											)}
-
 											<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
 												<h3 className="text-white font-bold text-lg">
-													{book.title}
+													{event.event_name}
 												</h3>
-												{book.subtitle && (
+												{event.description && (
 													<p className="text-white text-sm">
-														{book.subtitle}
+														{event.description}
 													</p>
 												)}
-												{book.date && (
+												{formatDate(event.time) && (
 													<p className="text-white font-bold mt-1">
-														{book.date}
+														{formatDate(event.time)}
 													</p>
 												)}
-												{book.description && (
+												{typeof event._count?.participants === "number" && (
 													<p className="text-white/90 text-xs mt-1">
-														{book.description}
+														{event._count.participants} registered
 													</p>
 												)}
 											</div>
 										</div>
 									</div>
-								</a>
+								</div>
 							))}
 					</div>
 				))}

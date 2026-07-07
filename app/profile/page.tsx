@@ -378,10 +378,16 @@ export default function ProfilePage() {
   const [rating, setRating] = useState(0);
   const [genresToExplore, setGenresToExplore] = useState([]);
   const [genresInput, setGenresInput] = useState("");
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState([] as { id: string; name: string }[]);
   const [wishlistInput, setWishlistInput] = useState("");
   const [readingGoals, setReadingGoals] = useState([]);
   const [readingGoalsInput, setReadingGoalsInput] = useState("");
+
+  // Live streak (from /api/streak) and persistent wishlist (from /api/wishlist)
+  const [streakData, setStreakData] = useState({ currentStreak: 0, dates: [] as string[] });
+  const [logging, setLogging] = useState(false);
+  const [availableBooks, setAvailableBooks] = useState([] as { id: string; name: string; author: string }[]);
+  const [selectedBookId, setSelectedBookId] = useState("");
 
   const handleStarClick = (index) => {
     setRating(index + 1);
@@ -426,13 +432,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAddToWishlist = () => {
-    if (wishlistInput.trim()) {
-      setWishlist([...wishlist, wishlistInput.trim()]);
-      setWishlistInput("");
-    }
-  };
-
   const handleAddToReadingGoals = () => {
     if (readingGoalsInput.trim()) {
       setReadingGoals([...readingGoals, readingGoalsInput.trim()]);
@@ -469,6 +468,94 @@ export default function ProfilePage() {
     return () => subscription.unsubscribe();
   }, [supabase.auth, router]);
 
+  // Fetch streak, persistent wishlist, and available books once the user is known
+  useEffect(() => {
+    if (!user?.id) return;
+
+    fetch(`/api/streak?userId=${user.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setStreakData({ currentStreak: data.currentStreak || 0, dates: data.dates || [] });
+      })
+      .catch((e) => console.error("Failed to fetch streak:", e));
+
+    fetch(`/api/wishlist?userId=${user.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.wishlist) {
+          setWishlist(data.wishlist.map((w: any) => ({ id: w.book_id, name: w.book?.name || "Unknown book" })));
+        }
+      })
+      .catch((e) => console.error("Failed to fetch wishlist:", e));
+
+    fetch("/api/books")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) setAvailableBooks(data);
+      })
+      .catch((e) => console.error("Failed to fetch books:", e));
+  }, [user?.id]);
+
+  // Record today's reading activity
+  const handleLogReading = async () => {
+    if (!user?.id) return;
+    setLogging(true);
+    try {
+      const res = await fetch("/api/streak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStreakData({ currentStreak: data.currentStreak || 0, dates: data.dates || [] });
+      }
+    } catch (e) {
+      console.error("Failed to log reading:", e);
+    } finally {
+      setLogging(false);
+    }
+  };
+
+  // Persist a book to the wishlist via the API
+  const handleAddBookToWishlist = async () => {
+    if (!user?.id || !selectedBookId) return;
+    const book = availableBooks.find((b) => b.id === selectedBookId);
+    if (!book) return;
+    if (wishlist.some((w: any) => w.id === selectedBookId)) return;
+
+    try {
+      const res = await fetch("/api/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, bookId: selectedBookId }),
+      });
+      if (res.ok || res.status === 409) {
+        setWishlist((prev: any) => [{ id: book.id, name: book.name }, ...prev.filter((w: any) => w.id !== book.id)]);
+        setSelectedBookId("");
+      }
+    } catch (e) {
+      console.error("Failed to add to wishlist:", e);
+    }
+  };
+
+  // Remove a book from the wishlist via the API
+  const handleRemoveFromWishlist = async (bookId: string) => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch("/api/wishlist", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, bookId }),
+      });
+      if (res.ok || res.status === 404) {
+        setWishlist((prev: any) => prev.filter((w: any) => w.id !== bookId));
+      }
+    } catch (e) {
+      console.error("Failed to remove from wishlist:", e);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut()
@@ -496,7 +583,8 @@ export default function ProfilePage() {
     { title: "Psychology of Money", author: "Morgan Housel", rating: 3 },
     { title: "1984", author: "George Orwell", rating: 4 },
   ];
-  const readingStreak = 10;
+  const readingStreak = streakData.currentStreak;
+  const streakDates = streakData.dates;
   const booksReviewed = 3;
   const readingDays = ["Jul 28", "Jul 29", "Jul 30", "Jul 31", "Aug 1", "Aug 2", "Aug 3"];
   const highestRatedBook = booksRead.reduce((max, book) => max.rating > book.rating ? max : book, booksRead[0]);
@@ -543,21 +631,22 @@ export default function ProfilePage() {
                   className="rounded-md border text-sm"
                   style={{ backgroundColor: "#ffffff", padding: "10px" }}
                   dayClassName={(date) => {
-                    const dateStr = date.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    });
                     const fullDate = date.toISOString().split('T')[0];
-                    const streakDates = [
-                      "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31",
-                      "2025-08-01", "2025-08-02", "2025-08-03"
-                    ];
                     return streakDates.includes(fullDate)
                       ? "bg-[#BA7FCB] text-white font-bold rounded-full"
                       : "text-gray-500";
                   }}
                 />
                 <p className="mt-2 text-sm text-center text-[#483285] font-semibold">Streak: {readingStreak} days</p>
+                <div className="mt-3 text-center">
+                  <Button
+                    className="bg-[#483285] text-white hover:bg-[#5a3fa0] disabled:opacity-60"
+                    onClick={handleLogReading}
+                    disabled={logging}
+                  >
+                    {logging ? "Logging..." : "📖 Log Reading"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -654,22 +743,36 @@ export default function ProfilePage() {
               <div className="bg-[#462C90] p-4 rounded-xl shadow-md">
                 <h3 className="font-bold mb-2">my wishlist</h3>
                 <div className="space-y-2">
-                  {wishlist.map((item, index) => (
-                    <p key={index} className="text-white text-sm bg-[#483285] p-2 rounded-md">
-                      {item}
-                    </p>
+                  {wishlist.length === 0 && (
+                    <p className="text-white/70 text-sm">No books wishlisted yet.</p>
+                  )}
+                  {wishlist.map((item: any) => (
+                    <div key={item.id} className="flex items-center justify-between text-white text-sm bg-[#483285] p-2 rounded-md">
+                      <span>{item.name}</span>
+                      <button
+                        onClick={() => handleRemoveFromWishlist(item.id)}
+                        className="text-white/70 hover:text-white ml-2"
+                        aria-label={`Remove ${item.name} from wishlist`}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ))}
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Input
-                    placeholder="Add to wishlist"
-                    value={wishlistInput}
-                    onChange={(e) => setWishlistInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddToWishlist()}
-                    className="bg-white/80 border-[#483285]/30 placeholder:text-slate-500 text-gray-500"
-                    defaultValue="Psychology of Money"
-                  />
-                  <Button className="bg-[#a855f7] hover:bg-[#9333ea]" onClick={handleAddToWishlist}>Add</Button>
+                  <select
+                    value={selectedBookId}
+                    onChange={(e) => setSelectedBookId(e.target.value)}
+                    className="flex-1 rounded-md bg-white/80 border border-[#483285]/30 text-gray-600 text-sm px-2 py-2"
+                  >
+                    <option value="">Select a book…</option>
+                    {availableBooks.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button className="bg-[#a855f7] hover:bg-[#9333ea]" onClick={handleAddBookToWishlist} disabled={!selectedBookId}>Add</Button>
                 </div>
               </div>
 

@@ -10,20 +10,26 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(uuid()) @db.Uuid
-  username         String?           @unique
-  name             String?
-  email            String?
-  age              Int?
-  occupation       String?
-  address          String?
-  bio              String?
-  genres           String[]          @default([])
-  created_at       DateTime          @default(now())
-  badges           Badge[]
-  bookDiaries      BookDiary[]
-  bookExchanges    BookExchange[]
-  bookspaceProfile BookspaceProfile?
+  id                  String               @id @default(uuid()) @db.Uuid
+  username            String?              @unique
+  name                String?
+  email               String?
+  age                 Int?
+  occupation          String?
+  address             String?
+  bio                 String?
+  genres              String[]             @default([])
+  created_at          DateTime             @default(now())
+  badges              Badge[]
+  bookDiaries         BookDiary[]
+  bookExchanges       BookExchange[]
+  bookspaceProfile    BookspaceProfile?
+  wishlists           Wishlist[]
+  eventParticipations EventParticipation[]
+  blogPosts           BlogPost[]
+  chatMessages        ChatMessage[]
+
+  @@index([username])
 }
 
 model BookspaceProfile {
@@ -50,6 +56,10 @@ model Book {
   bookRecommends   BookRecommend[]
   BookspaceProfile BookspaceProfile[]
   monthlyReads     MonthlyRead[]
+  wishlists        Wishlist[]
+
+  @@index([name])
+  @@index([author])
 }
 
 model BookDiary {
@@ -125,17 +135,69 @@ model TeamMember {
 }
 
 model Event {
-  id          String   @id @default(uuid()) @db.Uuid
-  event_name  String
-  description String
-  venue       String
-  time        DateTime
-  image       String
-  blog_link   String
+  id           String               @id @default(uuid()) @db.Uuid
+  event_name   String
+  description  String
+  venue        String
+  time         DateTime
+  image        String
+  blog_link    String
+  participants EventParticipation[]
 }
 
 model Blog {
   id   String @id @default(uuid()) @db.Uuid
   link String
+}
+
+// ─── New Models ────────────────────────────────────────
+
+model Wishlist {
+  id       String   @id @default(uuid()) @db.Uuid
+  user_id  String   @db.Uuid
+  book_id  String   @db.Uuid
+  added_at DateTime @default(now())
+  user     User     @relation(fields: [user_id], references: [id])
+  book     Book     @relation(fields: [book_id], references: [id])
+
+  @@unique([user_id, book_id])
+}
+
+model EventParticipation {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @db.Uuid
+  event_id      String   @db.Uuid
+  registered_at DateTime @default(now())
+  user          User     @relation(fields: [user_id], references: [id])
+  event         Event    @relation(fields: [event_id], references: [id])
+
+  @@unique([user_id, event_id])
+}
+
+model BlogPost {
+  id          String   @id @default(uuid()) @db.Uuid
+  author_id   String   @db.Uuid
+  title       String
+  content     String
+  excerpt     String?
+  cover_image String?
+  published   Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  author      User     @relation(fields: [author_id], references: [id])
+
+  @@index([title])
+  @@index([author_id])
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  username   String
+  message    String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@index([created_at])
 }
 
