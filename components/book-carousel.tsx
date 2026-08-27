@@ -6,6 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRealtimeBooks } from "@/hooks/useRealtimeBooks"
 
+/**
+ * Interface representing book entities returned from the `/api/books` endpoint.
+ */
 interface ApiBook {
 	id: string
 	name: string
@@ -15,18 +18,24 @@ interface ApiBook {
 	created_at: string
 }
 
-// Fallback data shown when the database has no books yet (keeps demos populated)
+/**
+ * Fallback book collection presented when database records are unpopulated.
+ */
 const fallbackBooks: ApiBook[] = [
 	{ id: "fb-1", name: "The Psychology of Money", author: "MORGAN HOUSEL", genre: "Finance", image: "/psychology.png", created_at: "" },
 	{ id: "fb-2", name: "1984", author: "GEORGE ORWELL", genre: "Classics", image: "/georgeorwell.png", created_at: "" },
 	{ id: "fb-3", name: "The Alchemist", author: "PAULO COELHO", genre: "Fiction", image: "/thealchemist.png", created_at: "" },
 ]
 
+/**
+ * Book Carousel Component.
+ * Displays interactive pages of 3 recommended books per slide with smooth scrolling and Supabase Realtime synchronization.
+ */
 export default function BookCarousel() {
 	const [initialBooks, setInitialBooks] = useState<ApiBook[]>([])
 	const [loaded, setLoaded] = useState(false)
 
-	// Initial fetch from the API
+	// Fetch initial book collection from API handler
 	useEffect(() => {
 		let active = true
 		fetch("/api/books")
@@ -46,26 +55,29 @@ export default function BookCarousel() {
 		}
 	}, [])
 
-	// Live updates via Supabase Realtime
+	// Synchronize live updates via Supabase Realtime hook
 	const books = useRealtimeBooks(initialBooks)
 
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const maxIndex = Math.max(0, Math.ceil(books.length / 3) - 1)
 	const carouselRef = useRef<HTMLDivElement>(null)
 
+	// Navigate to next carousel slide
 	const goToNext = () => {
 		setCurrentIndex((prev) => Math.min(prev + 1, maxIndex))
 	}
 
+	// Navigate to previous carousel slide
 	const goToPrev = () => {
 		setCurrentIndex((prev) => Math.max(prev - 1, 0))
 	}
 
-	// Keep the active page in range if the book count changes (realtime insert/delete)
+	// Keep pagination index within valid bounds when items update dynamically
 	useEffect(() => {
 		setCurrentIndex((prev) => Math.min(prev, maxIndex))
 	}, [maxIndex])
 
+	// Smooth scroll container to matching page offset
 	useEffect(() => {
 		const handleScroll = () => {
 			if (carouselRef.current) {
@@ -77,7 +89,6 @@ export default function BookCarousel() {
 			}
 		}
 
-		// Wait for next frame to ensure layout is ready
 		requestAnimationFrame(handleScroll)
 	}, [currentIndex])
 
@@ -89,6 +100,7 @@ export default function BookCarousel() {
 
 	return (
 		<div className="relative">
+			{/* Carousel Viewport Container */}
 			<div
 				ref={carouselRef}
 				className="flex overflow-x-hidden overflow-y-hidden snap-x snap-mandatory scroll-smooth"
@@ -137,6 +149,7 @@ export default function BookCarousel() {
 				))}
 			</div>
 
+			{/* Previous Slide Button */}
 			{currentIndex > 0 && (
 				<Button
 					variant="outline"
@@ -149,6 +162,7 @@ export default function BookCarousel() {
 				</Button>
 			)}
 
+			{/* Next Slide Button */}
 			{currentIndex < maxIndex && (
 				<Button
 					variant="outline"
@@ -161,6 +175,7 @@ export default function BookCarousel() {
 				</Button>
 			)}
 
+			{/* Pagination Dots */}
 			<div className="flex justify-center mt-4 space-x-2">
 				{Array.from({ length: maxIndex + 1 }).map((_, i) => (
 					<button
@@ -176,3 +191,4 @@ export default function BookCarousel() {
 		</div>
 	)
 }
+

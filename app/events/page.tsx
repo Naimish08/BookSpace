@@ -234,30 +234,118 @@ export default function Events() {
           </section>
 
           {/* Suggestion Box */}
-          <div className="bg-[#BA7FCB] rounded-lg p-6 max-w-md mx-auto">
-            <h2 className="text-lg sm:text-xl font-bold mb-2 text-center text-white">
-              SUGGESTION BOX
-            </h2>
-            <p className="text-center text-white mb-4">Drop what's on your mind</p>
-
-            <form className="space-y-4">
-              <input type="text" placeholder="Name:" className="w-full p-2 rounded-md" />
-              <input type="text" placeholder="Contact:" className="w-full p-2 rounded-md" />
-              <input type="email" placeholder="Email" className="w-full p-2 rounded-md" />
-              <textarea placeholder="Your Idea:" className="w-full p-2 rounded-md h-24"></textarea>
-
-              <div className="text-center">
-                <Button
-                  className="bg-[#241943] text-[#E1B5EE] hover:bg-[#E1B5EE] hover:text-[#241943] transition-colors"
-                  onClick={() => window.open("/about-us", "_blank")}
-                >
-                  SUBMIT
-                </Button>
-              </div>
-            </form>
-          </div>
+          <SuggestionBox />
         </section>
       </div>
     </main>
   );
 }
+
+function SuggestionBox() {
+  const [name, setName] = useState("");
+  const [contactNo, setContactNo] = useState("");
+  const [email, setEmail] = useState("");
+  const [idea, setIdea] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim() || !idea.trim()) {
+      setMsg("Please fill in your name, email, and idea.");
+      return;
+    }
+
+    setSending(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, contactNo, idea }),
+      });
+
+      if (res.ok) {
+        setSent(true);
+        setMsg("Thank you! Your idea has been dropped into our suggestion box. 💡");
+      } else {
+        setMsg("Failed to submit. Please try again.");
+      }
+    } catch {
+      setMsg("Something went wrong. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#BA7FCB] rounded-lg p-6 max-w-md mx-auto shadow-lg">
+      <h2 className="text-lg sm:text-xl font-bold mb-2 text-center text-white">
+        SUGGESTION BOX
+      </h2>
+      <p className="text-center text-white/90 text-sm mb-4">Drop what's on your mind</p>
+
+      {sent ? (
+        <div className="text-center text-white bg-white/10 p-4 rounded-lg">
+          <p className="font-semibold text-[#241943] bg-white py-2 px-3 rounded-md mb-2">{msg}</p>
+          <button
+            onClick={() => {
+              setSent(false);
+              setIdea("");
+              setMsg("");
+            }}
+            className="text-xs underline hover:text-white/80 mt-2"
+          >
+            Submit another idea
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {msg && <p className="text-xs text-white bg-red-500/80 p-2 rounded text-center">{msg}</p>}
+          <input
+            type="text"
+            placeholder="Name:"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full p-2.5 rounded-md text-gray-800 text-sm"
+          />
+          <input
+            type="text"
+            placeholder="Contact:"
+            value={contactNo}
+            onChange={(e) => setContactNo(e.target.value)}
+            className="w-full p-2.5 rounded-md text-gray-800 text-sm"
+          />
+          <input
+            type="email"
+            placeholder="Email:"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full p-2.5 rounded-md text-gray-800 text-sm"
+          />
+          <textarea
+            placeholder="Your Idea:"
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            required
+            className="w-full p-2.5 rounded-md text-gray-800 text-sm h-24"
+          ></textarea>
+
+          <div className="text-center">
+            <Button
+              type="submit"
+              disabled={sending}
+              className="bg-[#241943] text-[#E1B5EE] hover:bg-[#E1B5EE] hover:text-[#241943] transition-colors w-full sm:w-auto"
+            >
+              {sending ? "Submitting..." : "SUBMIT"}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+

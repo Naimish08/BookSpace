@@ -14,145 +14,208 @@ import styled, { keyframes } from "styled-components";
 import Image from 'next/image';
 import { Calendar } from "@/components/ui/calendar";
 
-// ProfileCard Component with Tailwind CSS
-const ProfileCard = ({ user = { username: "readinglovesme", email: "readinglovesme@gmail.com", bio: "(bio)" }, onSignOut }) => {
-  const router = useRouter()
-  const supabase = createClient()
+// ProfileCard Component with Tailwind CSS & Connection/Bio DB Integration
+const ProfileCard = ({
+  user,
+  currentUserId,
+  onSignOut,
+  onBioUpdated,
+}: {
+  user: any;
+  currentUserId: string;
+  onSignOut?: () => void;
+  onBioUpdated?: (newBio: string) => void;
+}) => {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const isOwnProfile = !user?.id || user.id === currentUserId;
+  const [bio, setBio] = useState(user?.bio || "(bio)");
+  const [isEditing, setIsEditing] = useState(false);
+  const [savingBio, setSavingBio] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [connectionsCount, setConnectionsCount] = useState(user?.connectionsCount || 0);
+
+  // Check connection status if viewing another user's profile
+  useEffect(() => {
+    setBio(user?.bio || "(bio)");
+    if (!isOwnProfile && currentUserId && user?.id) {
+      fetch(`/api/connections?userId=${currentUserId}`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((connections: any[]) => {
+          const connected = connections.some((c) => c.id === user.id);
+          setIsConnected(connected);
+        })
+        .catch((e) => console.error("Failed to check connection:", e));
+    }
+  }, [user, currentUserId, isOwnProfile]);
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error("Error signing out:", error.message)
+        console.error("Error signing out:", error.message);
       } else {
-        console.log("Successfully signed out")
-        router.push("/") // Changed from "/login-signup" to "/"
+        router.push("/");
       }
     } catch (error) {
-      console.error("Unexpected error during sign out:", error)
+      console.error("Unexpected error during sign out:", error);
     }
-  }
-
-  const [bio, setBio] = useState(user.bio || localStorage.getItem("savedBio") || "(bio)");
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentRead, setCurrentRead] = useState("Book Title");
-  const [wishlist, setWishlist] = useState("Wishlisted");
-  const genres = ["Fantasy", "Romance", "Sci-Fi", "Mystery"];
-
-  const handleEditClick = () => {
-    setIsEditing(true);
   };
 
-  const handleSaveBio = () => {
-    setIsEditing(false);
-    localStorage.setItem("savedBio", bio);
+  const handleSaveBio = async () => {
+    setSavingBio(true);
+    try {
+      const res = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: currentUserId, bio }),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        if (onBioUpdated) onBioUpdated(bio);
+      }
+    } catch (e) {
+      console.error("Failed to save bio:", e);
+    } finally {
+      setSavingBio(false);
+    }
   };
+
+  const handleToggleConnect = async () => {
+    if (!currentUserId || !user?.id || isOwnProfile || connecting) return;
+    setConnecting(true);
+    const method = isConnected ? "DELETE" : "POST";
+
+    try {
+      const res = await fetch("/api/connections", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, targetUserId: user.id }),
+      });
+
+      if (res.ok) {
+        setIsConnected(!isConnected);
+        setConnectionsCount((prev: number) => (isConnected ? Math.max(0, prev - 1) : prev + 1));
+      }
+    } catch (e) {
+      console.error("Failed to toggle connection:", e);
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const displayName = user?.name || user?.username || user?.email?.split("@")[0] || "Reader";
+  const displayUsername = user?.username || user?.email?.split("@")[0] || "readinglovesme";
 
   return (
     <section className="w-full max-w-4xl mx-auto bg-gradient-to-b from-[#3F2B96] to-[#A96EC3] text-white rounded-2xl shadow-lg p-6">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-white/30 pb-3">
-        <h2 className="text-xl font-semibold">📖 My BookSpace Profile</h2>
+        <h2 className="text-xl font-semibold">
+          📖 {isOwnProfile ? "My BookSpace Profile" : `${displayName}'s Profile`}
+        </h2>
         <div className="flex gap-2">
-          <button
-            className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
-            onClick={handleEditClick}
-          >
-            Edit
-          </button>
-          <button
-            className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transition"
-            onClick={handleSignOut}
-          >
-            Log Out
-          </button>
+          {isOwnProfile && (
+            <>
+              <button
+                className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? "Cancel" : "Edit"}
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transition"
+                onClick={handleSignOut}
+              >
+                Log Out
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Username + Avatar + Bio */}
       <div className="mt-4 flex gap-6 items-start">
-        <div className="w-24 h-24 rounded-full bg-white/80 flex items-center justify-center text-2xl font-bold text-[#3F2B96]">
-          {user.username.charAt(0).toUpperCase()}
+        <div className="w-24 h-24 rounded-full bg-white/80 flex items-center justify-center text-2xl font-bold text-[#3F2B96] shadow-md">
+          {displayUsername.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 space-y-1">
-          <h3 className="text-lg font-bold">{user.username}</h3>
+          <h3 className="text-lg font-bold">@{displayUsername}</h3>
           {isEditing ? (
-            <textarea
-              className="w-full bg-white/20 text-white placeholder:text-gray-300 text-sm rounded-lg p-2"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="(bio)"
-              rows={3}
-            />
+            <div className="space-y-2">
+              <textarea
+                className="w-full bg-white/20 text-white placeholder:text-gray-300 text-sm rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-white"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Write a short bio about your reading journey..."
+                rows={3}
+              />
+              <button
+                className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-100 transition disabled:opacity-50"
+                onClick={handleSaveBio}
+                disabled={savingBio}
+              >
+                {savingBio ? "Saving..." : "Save Bio"}
+              </button>
+            </div>
           ) : (
-            <p className="text-sm">{bio}</p>
-          )}
-          {isEditing && (
-            <button
-              className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold mt-2 hover:bg-gray-100 transition"
-              onClick={handleSaveBio}
-            >
-              Save
-            </button>
+            <p className="text-sm text-white/90 leading-relaxed">{bio}</p>
           )}
         </div>
       </div>
 
       {/* Real Name + Connect */}
       <div className="mt-4 flex flex-wrap items-center gap-4">
-        <p className="text-lg font-medium">Realname</p>
-        <button className="bg-white text-[#3F2B96] px-4 py-1 rounded-full text-sm font-bold hover:scale-105 transition-transform">
-          CONNECT
-        </button>
-        <div className="bg-[#3F2B96] px-4 py-1 rounded-md text-sm">{user.email}</div>
+        <p className="text-lg font-medium">{displayName}</p>
+        {!isOwnProfile ? (
+          <button
+            onClick={handleToggleConnect}
+            disabled={connecting}
+            className={`px-5 py-1.5 rounded-full text-sm font-bold shadow-md transition-all ${
+              isConnected
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-white text-[#3F2B96] hover:scale-105"
+            }`}
+          >
+            {connecting ? "Connecting..." : isConnected ? "CONNECTED ✓" : "+ CONNECT"}
+          </button>
+        ) : (
+          <div className="bg-[#3F2B96] px-4 py-1.5 rounded-md text-sm">{user?.email}</div>
+        )}
       </div>
 
       {/* Genres */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {genres.map((genre) => (
-          <span
-            key={genre}
-            className="bg-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold"
-          >
-            {genre}
-          </span>
-        ))}
-      </div>
-      {/* Current Read + Wishlist */}
-      <div className="mt-4 flex flex-wrap gap-4 items-center">
-        <div className="flex-1">
-          <label className="block text-sm mb-1">Current Read</label>
-          <select
-            className="w-full rounded-full text-[#3F2B96] px-4 py-2 text-sm bg-white"
-            value={currentRead}
-            onChange={(e) => setCurrentRead(e.target.value)}
-          >
-            <option>Book Title</option>
-            <option>Another Book</option>
-          </select>
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm mb-1">Gift Me a Book</label>
-          <select
-            className="w-full rounded-full text-[#3F2B96] px-4 py-2 text-sm bg-white"
-            value={wishlist}
-            onChange={(e) => setWishlist(e.target.value)}
-          >
-            <option>Wishlisted</option>
-            <option>New Wish</option>
-          </select>
-        </div>
+        {(user?.genres?.length ? user.genres : ["Fantasy", "Romance", "Sci-Fi", "Mystery"]).map(
+          (genre: string) => (
+            <span key={genre} className="bg-[#3F2B96] px-4 py-1 rounded-full text-sm font-semibold">
+              {genre}
+            </span>
+          )
+        )}
       </div>
 
       {/* Bottom Stats */}
       <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-        <div className="bg-white text-[#3F2B96] rounded-full py-2 font-semibold">Views</div>
-        <div className="bg-white text-[#3F2B96] rounded-full py-2 font-semibold">Connections</div>
-        <div className="bg-white text-[#3F2B96] rounded-full py-2 font-semibold">Streak/Reads</div>
+        <div className="bg-white text-[#3F2B96] rounded-xl py-2 px-3 font-semibold shadow">
+          <span className="block text-xs text-gray-500 font-normal">Views</span>
+          <span className="text-lg">{user?.views || 12}</span>
+        </div>
+        <div className="bg-white text-[#3F2B96] rounded-xl py-2 px-3 font-semibold shadow">
+          <span className="block text-xs text-gray-500 font-normal">Connections</span>
+          <span className="text-lg">{connectionsCount}</span>
+        </div>
+        <div className="bg-white text-[#3F2B96] rounded-xl py-2 px-3 font-semibold shadow">
+          <span className="block text-xs text-gray-500 font-normal">Streak/Reads</span>
+          <span className="text-lg">{user?.reads || 5}</span>
+        </div>
       </div>
     </section>
   );
 };
+
 
 // Updated BookCover component
 const BookCover = ({ imageUrl, title, author, rating = 5 }) => (
@@ -380,29 +443,24 @@ export default function ProfilePage() {
   const [genresInput, setGenresInput] = useState("");
   const [wishlist, setWishlist] = useState([] as { id: string; name: string }[]);
   const [wishlistInput, setWishlistInput] = useState("");
-  const [readingGoals, setReadingGoals] = useState([]);
-  const [readingGoalsInput, setReadingGoalsInput] = useState("");
+  const [diaryEntries, setDiaryEntries] = useState<any[]>([]);
 
-  // Live streak (from /api/streak) and persistent wishlist (from /api/wishlist)
-  const [streakData, setStreakData] = useState({ currentStreak: 0, dates: [] as string[] });
-  const [logging, setLogging] = useState(false);
-  const [availableBooks, setAvailableBooks] = useState([] as { id: string; name: string; author: string }[]);
-  const [selectedBookId, setSelectedBookId] = useState("");
-
-  const handleStarClick = (index) => {
+  const handleStarClick = (index: number) => {
     setRating(index + 1);
   };
 
   const handleSave = async () => {
+    if (!user?.id || !bookName) return;
     const bookDiaryData = {
       userId: user?.id,
-      bookName,
+      title: bookName,
       author,
       genre,
+      type: "finished",
       startDate,
       endDate,
       rating,
-      thoughts,
+      description: thoughts,
     };
 
     try {
@@ -413,7 +471,9 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        setFeedback("Saved successfully!");
+        const newEntry = await response.json();
+        setDiaryEntries((prev) => [newEntry, ...prev]);
+        setFeedback("Saved successfully to your reading diary!");
         setTimeout(() => setFeedback(""), 3000);
         setBookName(""); setAuthor(""); setGenre(""); setStartDate(""); setEndDate(""); setThoughts(""); setRating(0);
       } else {
@@ -468,7 +528,7 @@ export default function ProfilePage() {
     return () => subscription.unsubscribe();
   }, [supabase.auth, router]);
 
-  // Fetch streak, persistent wishlist, and available books once the user is known
+  // Fetch streak, persistent wishlist, book diary, and available books once the user is known
   useEffect(() => {
     if (!user?.id) return;
 
@@ -487,6 +547,13 @@ export default function ProfilePage() {
         }
       })
       .catch((e) => console.error("Failed to fetch wishlist:", e));
+
+    fetch(`/api/book-diary?userId=${user.id}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) setDiaryEntries(data);
+      })
+      .catch((e) => console.error("Failed to fetch book diary:", e));
 
     fetch("/api/books")
       .then((res) => (res.ok ? res.json() : []))

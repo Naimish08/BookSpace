@@ -6,14 +6,18 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { createClient } from "@/utils/superbase/client";
 import { User } from "@supabase/supabase-js";
-// import { useSession, signOut } from "next-auth/react";
 
+/**
+ * Navigation Header Component for BookSpace.
+ * Manages responsive mobile navigation drawer and active Supabase user session state.
+ */
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  // Listen to Supabase auth session changes on component mount
   useEffect(() => {
     const getSession = async () => {
       const {
@@ -35,6 +39,7 @@ export default function Header() {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
+  // Base navigation links accessible to all visitors
   const baseLinks = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
@@ -45,17 +50,20 @@ export default function Header() {
     { href: "/about-us", label: "About Us" },
   ];
 
+  // Dynamic link collection depending on authenticated session status
   const links = user
     ? [...baseLinks, { href: "/chat", label: "Chat" }, { href: "/profile", label: "Profile" }]
-    : [...baseLinks,{ href: "/login-signup", label: "Sign in" }];
+    : [...baseLinks, { href: "/login-signup", label: "Sign in" }];
 
   return (
     <header className="container mx-auto py-4 px-4">
       <div className="flex items-center justify-between">
+        {/* Brand Logo */}
         <h1 className="text-2xl font-serif font-bold text-[#a87c9f]">
           Book<span className="text-[#8d6e63]">Space</span>
         </h1>
 
+        {/* Desktop Navigation Links */}
         <nav className="hidden md:flex space-x-6">
           {!loading &&
             links.map(({ href, label }) => (
@@ -67,9 +75,9 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-          {/* {loading && <span className="text-[#8d6e63]">Loading...</span>} */}
         </nav>
 
+        {/* Mobile Menu Toggle Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="md:hidden text-[#8d6e63]"
@@ -79,6 +87,7 @@ export default function Header() {
         </button>
       </div>
 
+      {/* Mobile Drawer Navigation Links */}
       {isMenuOpen && (
         <nav className="flex flex-col mt-4 space-y-3 md:hidden">
           {!loading &&
@@ -98,3 +107,4 @@ export default function Header() {
     </header>
   );
 }
+

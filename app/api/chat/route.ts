@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// ─── GET /api/chat ──────────────────────────────────────
+/**
+ * GET /api/chat
+ * Retrieves the latest 50 community chat messages ordered chronologically.
+ */
 export async function GET() {
   try {
     const messages = await prisma.chatMessage.findMany({
@@ -18,7 +21,7 @@ export async function GET() {
       },
     });
 
-    // Reverse so oldest is first (chronological order)
+    // Reverse array so oldest messages appear first in chat history
     messages.reverse();
 
     return NextResponse.json(messages);
@@ -31,7 +34,10 @@ export async function GET() {
   }
 }
 
-// ─── POST /api/chat ─────────────────────────────────────
+/**
+ * POST /api/chat
+ * Broadcasts a new chat message from an authenticated user.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -70,3 +76,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

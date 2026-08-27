@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Instagram, Facebook, Twitter, Search, BookOpen, User, FileText } from "lucide-react"
+import { ChevronDown, Search, BookOpen, User, FileText } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -12,24 +12,33 @@ import EventCarousel from "@/components/event-carousel"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDebounce } from "@/hooks/useDebounce"
 
+/** Framer motion animation variant for fade-in with slide-up effect */
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 }
 
+/** Framer motion animation variant for standard opacity fade-in */
 const fadeIn = {
   initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } }
+  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" as const } }
 }
 
+/**
+ * Main Home Page Component for BookSpace.
+ * Features hero video banner, live debounced search, book & event carousels, animated scroll quotes, and book shelf.
+ */
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<{ books: any[]; users: any[]; blogs: any[] }>({ books: [], users: [], blogs: [] })
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+  
+  // Debounce search query input to avoid excess API calls
   const debouncedQuery = useDebounce(searchQuery, 300)
 
+  // Fetch search results when debounced query changes
   useEffect(() => {
     if (debouncedQuery.trim().length < 2) {
       setSearchResults({ books: [], users: [], blogs: [] })
@@ -54,6 +63,7 @@ export default function Home() {
     fetchResults()
   }, [debouncedQuery])
 
+  // Close search dropdown when clicking outside search area
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -75,7 +85,7 @@ export default function Home() {
       className="min-h-screen bg-[#FDE8BE]"
     >
       <main>
-        {/* Hero Video Section */}
+        {/* ─── 1. Hero Video Banner Section ─── */}
         <motion.section 
           className="relative w-full overflow-hidden"
           style={{ 
@@ -96,22 +106,13 @@ export default function Home() {
               className="w-full object-cover"
               style={{
                 maxWidth: '100%',
-                // Mobile styles
-                '@media (max-width: 768px)': {
-                  height: '45vh',
-                  marginBottom: '-2px',
-                },
-                // Desktop styles
-                '@media (min-width: 769px)': {
-                  height: '80vh',
-                }
               }}
             >
               <source src="/landingpage.mp4" type="video/mp4" />
             </video>
           </div>
 
-          {/* Scroll Indicator */}
+          {/* Scroll Down Cue Indicator */}
           <motion.div 
             className="absolute bottom-2 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white flex flex-col items-center cursor-pointer z-10"
             animate={{ y: [0, 10, 0] }}
@@ -123,7 +124,7 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* Search Bar Section */}
+        {/* ─── 2. Global Live Search Bar Section ─── */}
         <motion.section className="container mx-auto px-4 py-8" initial="initial" animate="animate" variants={fadeInUp}>
           <motion.div className="w-full mb-6" variants={fadeIn}>
             <div className="relative w-full" ref={searchRef}>
@@ -142,7 +143,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Search Results Dropdown */}
+              {/* Dynamic Live Search Overlay Dropdown */}
               <AnimatePresence>
                 {showResults && hasResults && (
                   <motion.div
@@ -151,6 +152,7 @@ export default function Home() {
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-[#E1B5EE] z-50 max-h-[400px] overflow-y-auto"
                   >
+                    {/* Books Results Category */}
                     {searchResults.books.length > 0 && (
                       <div className="p-3">
                         <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
@@ -169,6 +171,7 @@ export default function Home() {
                         ))}
                       </div>
                     )}
+                    {/* Community Users Category */}
                     {searchResults.users.length > 0 && (
                       <div className="p-3 border-t border-[#E1B5EE]">
                         <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
@@ -189,6 +192,7 @@ export default function Home() {
                         ))}
                       </div>
                     )}
+                    {/* Blog Posts Category */}
                     {searchResults.blogs.length > 0 && (
                       <div className="p-3 border-t border-[#E1B5EE]">
                         <div className="flex items-center gap-2 text-xs font-bold text-[#462C90] uppercase mb-2 px-2">
@@ -215,7 +219,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Welcome Heading */}
+          {/* ─── 3. Welcome Heading & Book Flip Animation ─── */}
           <motion.div className="bg-[#] py-2 px-2" variants={fadeInUp}>
             <h2 className="text-3xl font-caveat italic text-[#BA7FCB] mb-4">Welcome to BookSpace</h2>
             <div className="grid md:grid-cols-2 gap-8">
@@ -232,12 +236,12 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* Take Part Today Section */}
+        {/* ─── 4. Featured Event Banner Section ─── */}
         <motion.section className="container mx-auto px-0 py-8 mb-12" initial="initial" whileInView="animate" viewport={{ once: true }} variants={fadeInUp}>
           <motion.div
             className="rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col gap-6"
             animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" as const }}
             style={{
               backgroundImage: "linear-gradient(270deg, #E1B5EE, #BA7FCB, #8D67BB, #E1B5EE)",
               backgroundSize: "800% 800%"
@@ -262,7 +266,7 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* Get Inspired Section */}
+        {/* ─── 5. Animated Reading Quotes Marquee Section ─── */}
         <motion.section className="container mx-auto px-0 py-0" initial="initial" whileInView="animate" viewport={{ once: true }} variants={fadeInUp}>
           <div className="rounded-2xl p-4 md:p-8 relative min-h-[350px]" style={{ background: "linear-gradient(to bottom, #E1B5EE, #8D67BB)" }}>
             <h2 className="text-2xl md:text-3xl font-serif text-[#241943] text-center mb-6 relative z-10 font-bold">Get Inspired</h2>
@@ -277,19 +281,19 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* What's Happening Section */}
+        {/* ─── 6. Upcoming Community Events Carousel ─── */}
         <motion.section className="max-w-5xl mx-auto px-4 py-8 mb-12" initial="initial" whileInView="animate" viewport={{ once: true }} variants={fadeInUp}>
           <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8 font-bold">What's Happening</h2>
           <EventCarousel />
         </motion.section>
 
-        {/* Book Recommends Section */}
+        {/* ─── 7. Book Recommendations Carousel ─── */}
         <motion.section className="max-w-5xl mx-auto px-4 py-8 mb-12 overflow-x-hidden overflow-y-visible" initial="initial" whileInView="animate" viewport={{ once: true }} variants={fadeInUp}>
           <h2 className="text-3xl font-merriweather text-[#241943] text-center mb-8 font-bold">Book Recommends</h2>
           <BookCarousel />
         </motion.section>
 
-        {/* Currently Reading Section */}
+        {/* ─── 8. Currently Reading Bookshelf Banner Section ─── */}
         <motion.section className="container mx-auto px-4 py-12 relative" initial="initial" whileInView="animate" viewport={{ once: true }} variants={fadeInUp}>
           <div className="absolute top-[-210px] left-0 right-0 bottom-0 w-full bg-[url('/bookshelf.png')] bg-cover bg-top opacity-70 z-0"></div>
           <div className="relative bg-[#f8efd0]/90 rounded-2xl p-6 max-w-5xl mx-auto z-10">
@@ -317,3 +321,4 @@ export default function Home() {
     </motion.div>
   )
 }
+

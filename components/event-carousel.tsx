@@ -5,6 +5,9 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+/**
+ * Interface representing event entities returned from the `/api/events` endpoint.
+ */
 interface ApiEvent {
 	id: string
 	event_name: string
@@ -16,18 +19,24 @@ interface ApiEvent {
 	_count?: { participants: number }
 }
 
-// Fallback data shown when the database has no events yet (keeps demos populated)
+/**
+ * Fallback event list used when database records are empty.
+ */
 const fallbackEvents: ApiEvent[] = [
 	{ id: "fe-1", event_name: "Book Review Show", description: "Community book reviews", venue: "Online", time: "", image: "/bookreview.png", blog_link: "" },
 	{ id: "fe-2", event_name: "Book Exchange", description: "Blind Date with a Book", venue: "Vile Parle", time: "", image: "/bookexchange.png", blog_link: "" },
 	{ id: "fe-3", event_name: "Literacy Drive", description: "Book Donation Drive", venue: "Mumbai", time: "", image: "/literacydrive.png", blog_link: "" },
 ]
 
+/**
+ * Event Carousel Component.
+ * Displays interactive pages of 3 community events per slide with pagination and date formatting.
+ */
 export default function EventCarousel() {
 	const [events, setEvents] = useState<ApiEvent[]>([])
 	const [loaded, setLoaded] = useState(false)
 
-	// Initial fetch from the API
+	// Fetch event listings from API handler
 	useEffect(() => {
 		let active = true
 		fetch("/api/events")
@@ -52,18 +61,22 @@ export default function EventCarousel() {
 	const maxIndex = Math.max(0, Math.ceil(events.length / 3) - 1)
 	const carouselRef = useRef<HTMLDivElement>(null)
 
+	// Navigate to next carousel slide
 	const goToNext = () => {
 		setCurrentIndex((prev) => Math.min(prev + 1, maxIndex))
 	}
 
+	// Navigate to previous carousel slide
 	const goToPrev = () => {
 		setCurrentIndex((prev) => Math.max(prev - 1, 0))
 	}
 
+	// Keep index within bounds when event count updates
 	useEffect(() => {
 		setCurrentIndex((prev) => Math.min(prev, maxIndex))
 	}, [maxIndex])
 
+	// Scroll viewport smoothly to active page
 	useEffect(() => {
 		const handleScroll = () => {
 			if (carouselRef.current) {
@@ -84,6 +97,7 @@ export default function EventCarousel() {
 		)
 	}
 
+	// Format event timestamp string into readable date string
 	const formatDate = (time: string) => {
 		if (!time) return ""
 		const d = new Date(time)
@@ -93,6 +107,7 @@ export default function EventCarousel() {
 
 	return (
 		<div className="relative">
+			{/* Carousel Viewport Container */}
 			<div
 				ref={carouselRef}
 				className="flex overflow-x-hidden overflow-y-hidden snap-x snap-mandatory scroll-smooth"
@@ -146,6 +161,7 @@ export default function EventCarousel() {
 				))}
 			</div>
 
+			{/* Previous Slide Button */}
 			{currentIndex > 0 && (
 				<Button
 					variant="outline"
@@ -158,6 +174,7 @@ export default function EventCarousel() {
 				</Button>
 			)}
 
+			{/* Next Slide Button */}
 			{currentIndex < maxIndex && (
 				<Button
 					variant="outline"
@@ -170,6 +187,7 @@ export default function EventCarousel() {
 				</Button>
 			)}
 
+			{/* Pagination Indicators */}
 			<div className="flex justify-center mt-4 space-x-2">
 				{Array.from({ length: maxIndex + 1 }).map((_, i) => (
 					<button
@@ -185,3 +203,4 @@ export default function EventCarousel() {
 		</div>
 	)
 }
+

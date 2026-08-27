@@ -20,14 +20,16 @@ model User {
   bio                 String?
   genres              String[]             @default([])
   created_at          DateTime             @default(now())
-  badges              Badge[]
-  bookDiaries         BookDiary[]
-  bookExchanges       BookExchange[]
-  bookspaceProfile    BookspaceProfile?
-  wishlists           Wishlist[]
-  eventParticipations EventParticipation[]
-  blogPosts           BlogPost[]
-  chatMessages        ChatMessage[]
+  badges                   Badge[]
+  bookDiaries              BookDiary[]
+  bookExchanges            BookExchange[]
+  bookspaceProfile         BookspaceProfile?
+  wishlists                Wishlist[]
+  eventParticipations      EventParticipation[]
+  blogPosts                BlogPost[]
+  chatMessages             ChatMessage[]
+  directMessages           DirectMessage[]
+  conversationParticipants ConversationParticipant[]
 
   @@index([username])
 }
@@ -201,3 +203,41 @@ model ChatMessage {
   @@index([created_at])
 }
 
+// ─── Direct Messaging Models ───────────────────────────
+
+/// Represents a private 1:1 conversation between two connected users.
+model Conversation {
+  id           String                    @id @default(uuid()) @db.Uuid
+  created_at   DateTime                  @default(now())
+  updated_at   DateTime                  @updatedAt
+  messages     DirectMessage[]
+  participants ConversationParticipant[]
+}
+
+/// Junction table linking users to their conversations.
+/// Each conversation has exactly two participants for 1:1 DMs.
+model ConversationParticipant {
+  id              String       @id @default(uuid()) @db.Uuid
+  conversation_id String       @db.Uuid
+  user_id         String       @db.Uuid
+  joined_at       DateTime     @default(now())
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id])
+
+  @@unique([conversation_id, user_id])
+  @@index([user_id])
+}
+
+/// Individual direct message within a conversation.
+model DirectMessage {
+  id              String       @id @default(uuid()) @db.Uuid
+  conversation_id String       @db.Uuid
+  sender_id       String       @db.Uuid
+  message         String
+  created_at      DateTime     @default(now())
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User         @relation(fields: [sender_id], references: [id])
+
+  @@index([conversation_id, created_at])
+  @@index([sender_id])
+}

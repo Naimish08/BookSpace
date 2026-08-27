@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// ─── GET /api/books ─────────────────────────────────────
+/**
+ * GET /api/books
+ * Retrieves all books from the database ordered by newest creation date.
+ */
 export async function GET() {
   try {
     const books = await prisma.book.findMany({
@@ -18,7 +21,10 @@ export async function GET() {
   }
 }
 
-// ─── POST /api/books ────────────────────────────────────
+/**
+ * POST /api/books
+ * Creates a new book entry in the catalogue. Requires name, author, genre, and image.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -49,3 +55,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

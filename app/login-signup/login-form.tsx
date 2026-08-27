@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { createClient } from "@/utils/superbase/client";
-import { PrismaClient } from "@/lib/generated/prisma";
 import { useRouter } from "next/navigation";
 
 export default function Component() {
@@ -76,7 +75,8 @@ export default function Component() {
             },
             body: JSON.stringify({
               id: data.user.id,
-              username: form.username,
+              email: form.email,
+              username: form.username || form.email.split("@")[0],
               name: form.name,
               address: form.city,
             }),
@@ -266,6 +266,13 @@ export default function Component() {
                 <div className="space-y-4 mb-6">
                   {activeTab === "signup" && (
                     <>
+                      <Input
+                        placeholder="Username *"
+                        name="username"
+                        value={form.username}
+                        onChange={handleChange}
+                        className="bg-white bg-opacity-20 border-0 text-white placeholder:text-gray-300 rounded-full py-3 px-4"
+                      />
                       <Input
                         placeholder="Name *"
                         name="name"

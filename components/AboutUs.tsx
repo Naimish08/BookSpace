@@ -1,5 +1,51 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function ImpactSection() {
+  const [impacts, setImpacts] = useState({
+    active_users: 246,
+    books_donated: 60,
+    children_educated: 20,
+  });
+
+  useEffect(() => {
+    fetch('/api/impact')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setImpacts({
+            active_users: data.active_users || 246,
+            books_donated: data.books_donated || 60,
+            children_educated: data.children_educated || 20,
+          });
+        }
+      })
+      .catch((e) => console.error('Failed to fetch impact stats:', e));
+  }, []);
+
+  return (
+    <div className="bg-[#9C5C44] rounded-3xl text-white w-[90%] lg:w-3/4 p-6 md:p-8 text-center mb-12 shadow-xl">
+      <h2 className="text-2xl md:text-3xl font-merriweather font-bold text-[#FDE8BE] mb-8">
+        IMPACTS MADE
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 place-items-center">
+        {[
+          { value: impacts.active_users, label: "ACTIVE READERS" },
+          { value: impacts.books_donated, label: "BOOK DONATION" },
+          { value: impacts.children_educated, label: "CHILDREN EDUCATED" },
+        ].map((impact, idx) => (
+          <div
+            key={idx}
+            className="bg-[#D9CFC9] text-[#5D2F1C] rounded-full w-32 h-32 md:w-36 md:h-36 flex flex-col justify-center items-center shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg mx-auto border-2 border-white/40"
+          >
+            <span className="text-2xl md:text-3xl font-bold">{impact.value}</span>
+            <p className="text-center text-xs md:text-sm mt-1 px-2 font-semibold">{impact.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AboutUs() {
   const [activeTab, setActiveTab] = useState("vision");
@@ -118,8 +164,15 @@ export default function AboutUs() {
               onClick={() => setShowFact(!showFact)}
             />
             {showFact && (
-              <div className="absolute -top-[80px] w-[180px] bg-white text-[#5D2F1C] text-sm p-3 rounded-2xl shadow-lg z-20 animate-fade-in">
-                Lorem ipsum dolor sit amet, consectetur...
+              <div className="absolute -top-[110px] w-[240px] bg-white text-[#5D2F1C] text-xs p-3 rounded-2xl shadow-xl z-20 border border-[#9C5C44]/30 animate-fade-in text-center font-sans">
+                💡 <span className="font-semibold text-[#704CAA]">Literary Fact:</span> {
+                  [
+                    "Reading for just 6 minutes a day can reduce stress levels by up to 68%.",
+                    "The longest sentence ever printed in a book contains 823 words (in Victor Hugo's Les Misérables).",
+                    "The smell of old books is caused by the breakdown of organic compounds like vanillin in paper!",
+                    "Bibliosmia is the official word for loving the smell of old or new books."
+                  ][Math.floor(Math.random() * 4)]
+                }
               </div>
             )}
             <div className="mt-4 text-[#5D2F1C] font-bold text-sm md:text-base text-center">
@@ -131,26 +184,7 @@ export default function AboutUs() {
       </div>
 
       {/* IMPACTS */}
-      <div className="bg-[#9C5C44] rounded-3xl text-white w-[90%] lg:w-3/4 p-6 md:p-8 text-center mb-12">
-        <h2 className="text-2xl md:text-3xl font-merriweather font-bold text-[#311E17] mb-8">
-          IMPACTS MADE
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 place-items-center">
-          {[
-            { value: 246, label: "ACTIVE READERS" },
-            { value: 60, label: "BOOK DONATION" },
-            { value: 20, label: "CHILDREN EDUCATED" },
-          ].map((impact, idx) => (
-            <div
-              key={idx}
-              className="bg-[#D9CFC9] text-[#5D2F1C] rounded-full w-32 h-32 md:w-36 md:h-36 flex flex-col justify-center items-center shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg mx-auto"
-            >
-              <span className="text-2xl md:text-3xl font-bold">{impact.value}</span>
-              <p className="text-center text-xs md:text-sm mt-1 px-2">{impact.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ImpactSection />
     </div>
   );
 }

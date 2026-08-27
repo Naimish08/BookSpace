@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// ─── In-memory LRU Cache ───────────────────────────────
+/**
+ * Cache entry structure for LRU search caching.
+ */
 interface CacheEntry {
   data: unknown;
   timestamp: number;
 }
 
+// In-memory cache configuration
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL
 const CACHE_MAX_SIZE = 100;
 
+/**
+ * Retrieves a valid cached entry by key, refreshing LRU position.
+ */
 function getCached(key: string): unknown | null {
   const entry = cache.get(key);
   if (!entry) return null;
@@ -18,14 +24,16 @@ function getCached(key: string): unknown | null {
     cache.delete(key);
     return null;
   }
-  // Move to end (most recently used)
+  // Move to end to track recent usage
   cache.delete(key);
   cache.set(key, entry);
   return entry.data;
 }
 
+/**
+ * Stores a search response in LRU cache with eviction logic.
+ */
 function setCached(key: string, data: unknown): void {
-  // Evict oldest entry if at capacity
   if (cache.size >= CACHE_MAX_SIZE) {
     const oldestKey = cache.keys().next().value;
     if (oldestKey !== undefined) {
@@ -35,7 +43,10 @@ function setCached(key: string, data: unknown): void {
   cache.set(key, { data, timestamp: Date.now() });
 }
 
-// ─── GET /api/search?q=...&type=all|books|users|blogs ──
+/**
+ * GET /api/search?q=...&type=all|books|users|blogs
+ * Performs global case-insensitive search across books, users, and blog posts with LRU caching.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -115,10 +126,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Search API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
+

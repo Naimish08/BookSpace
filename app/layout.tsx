@@ -2,9 +2,10 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header"; // Create this file
-import Footer from "@/components/Footer"; // optional if you want to move it out too
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
+// Font configurations loaded via Next.js Google Fonts optimization
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -17,13 +18,20 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600"],
 });
 
+
+/**
+ * Root Application Metadata for SEO & Social Sharing.
+ */
 export const metadata: Metadata = {
   title: "BookSpace",
   description: "A community where readers and books are celebrated",
   generator: "BookSpace Team",
-  viewport: "width=device-width, initial-scale=1",
 };
 
+/**
+ * Root Layout Wrapper.
+ * Injects Google Fonts CSS variables, site Header, page content, and site Footer.
+ */
 export default function RootLayout({
   children,
 }: {
@@ -41,3 +49,4 @@ export default function RootLayout({
     </html>
   );
 }
+

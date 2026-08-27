@@ -612,41 +612,52 @@ export default function Component() {
         </div>
       </section>
 
-      {/* Badges Section */}
-      <section className="py-16">
+      {/* Badges & Milestone Achievements Section */}
+      <section className="py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg p-8 mb-8">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-white mb-6 font-playfair">Fiction</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {Array.from({ length: 12 }).map((_, index) => (
-                    <div key={index} className="w-14 h-14 bg-purple-900 rounded-lg"></div>
-                  ))}
-                </div>
-              </div>
+          <div className="bg-gradient-to-r from-purple-800 to-[#462C90] rounded-2xl p-8 shadow-2xl border border-purple-400/30">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold text-white font-playfair tracking-wide flex items-center justify-center gap-3">
+                🏆 Reading Badges & Achievements
+              </h3>
+              <p className="text-purple-200 text-sm mt-2">
+                Unlock milestone badges by reading books, maintaining streaks, and connecting with community members.
+              </p>
+            </div>
 
-              <div className="text-center">
-                <div className="bg-purple-700 rounded-lg p-6 mb-4">
-                  <h3 className="text-4xl font-bold text-white mb-4 font-playfair tracking-widest">BADGES</h3>
-                  <div className="w-16 h-16 bg-yellow-400 rounded-full mx-auto mb-6"></div>
-                  <div className="bg-purple-800 rounded-lg p-4 mb-4">
-                    <h4 className="text-white font-bold mb-3 text-xl font-playfair">Analytics</h4>
-                    <p className="text-white text-sm font-poppins">fiction vs non fiction pie chart</p>
-                    <p className="text-white text-sm font-poppins">below new batch unlocked</p>
-                  </div>
-                  <p className="text-white text-sm font-poppins font-medium">congrats, you unlocked a new badge</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {(earnedBadges.length > 0
+                ? earnedBadges
+                : [
+                    { name: '📚 First Read', description: 'Complete your first book', earned: true },
+                    { name: '🔥 Streak Master', description: '7-day reading streak', earned: readingStreak >= 7 },
+                    { name: '⭐ Bookworm', description: 'Complete 5 books', earned: false },
+                    { name: '🏆 Bibliophile', description: 'Complete 10 books', earned: false },
+                    { name: '✍️ First Blog', description: 'Publish your first blog post', earned: false },
+                    { name: '🤝 Social Reader', description: 'Make 5 connections', earned: false },
+                    { name: '📅 Event Explorer', description: 'Participate in an event', earned: false },
+                  ]
+              ).map((badge, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-xl text-center border transition-all ${
+                    badge.earned
+                      ? 'bg-gradient-to-b from-[#BA7FCB]/40 to-[#483285] border-yellow-400/50 text-white shadow-lg'
+                      : 'bg-white/5 border-white/10 text-white/40 grayscale'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{badge.name.split(' ')[0]}</div>
+                  <h4 className="font-bold text-sm text-white">{badge.name.slice(3)}</h4>
+                  <p className="text-xs text-white/70 mt-1">{badge.description}</p>
+                  <span
+                    className={`inline-block mt-3 px-3 py-0.5 rounded-full text-[10px] font-bold ${
+                      badge.earned ? 'bg-yellow-400 text-purple-900' : 'bg-white/10 text-white/50'
+                    }`}
+                  >
+                    {badge.earned ? 'UNLOCKED ✨' : 'LOCKED 🔒'}
+                  </span>
                 </div>
-              </div>
-
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-white mb-6 font-playfair">Non Fiction</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {Array.from({ length: 12 }).map((_, index) => (
-                    <div key={index} className="w-14 h-14 bg-purple-900 rounded-lg"></div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

@@ -5,8 +5,8 @@ import React from "react";
 const CONTACT_EMAIL = "bookspace@gmail.com";
 
 export default function JoinUs() {
-  const handleSignUp = () => {
-    window.location.href = "/sign-up";
+  const handleJoin = () => {
+    window.location.href = "/login-signup";
   };
 
   const handleEmailCV = () => {
@@ -71,9 +71,8 @@ export default function JoinUs() {
                 Join our book club and connect with fellow readers. Get access to exclusive events, book exchanges, and community discussions.
               </p>
               <button
-                onClick={handleSignUp}
-                className="w-full bg-[#AC6F59] hover:bg-[#9D5F4A] text-white font-bold py-3 px-6 rounded-full transition-colors duration-200 font-['Literata']"
-                aria-label="Sign up to become a member"
+                onClick={handleJoin}
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#8D67BB] hover:bg-[#7A56AA] text-white font-['Poppins'] font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
               >
                 Sign Up Now
               </button>

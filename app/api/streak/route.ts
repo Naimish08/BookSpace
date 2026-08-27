@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// ─── Helpers ────────────────────────────────────────────
+/**
+ * Returns today's ISO date string formatted as YYYY-MM-DD.
+ */
 function getTodayDateString(): string {
   const now = new Date();
-  return now.toISOString().split('T')[0]; // YYYY-MM-DD
+  return now.toISOString().split('T')[0];
 }
 
+/**
+ * Computes consecutive active reading days count given an array of date strings.
+ */
 function computeCurrentStreak(dates: string[]): number {
   if (dates.length === 0) return 0;
 
@@ -18,7 +23,7 @@ function computeCurrentStreak(dates: string[]): number {
 
   const lastDate = sorted[sorted.length - 1];
 
-  // Streak only counts if the last date is today or yesterday
+  // Streak only counts if the last date recorded is today or yesterday
   if (lastDate !== today && lastDate !== yesterdayStr) {
     return 0;
   }
@@ -40,6 +45,9 @@ function computeCurrentStreak(dates: string[]): number {
   return streak;
 }
 
+/**
+ * Safely parses the streak_calendar JSON field into a date string array.
+ */
 function parseDates(streakCalendar: unknown): string[] {
   if (
     streakCalendar &&
@@ -52,7 +60,10 @@ function parseDates(streakCalendar: unknown): string[] {
   return [];
 }
 
-// ─── GET /api/streak?userId=... ─────────────────────────
+/**
+ * GET /api/streak?userId=...
+ * Calculates current reading streak and returns activity calendar dates for a user.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -94,7 +105,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ─── POST /api/streak ──────────────────────────────────
+/**
+ * POST /api/streak
+ * Records today as an active reading day for the user and updates their streak calculation.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -109,7 +123,6 @@ export async function POST(request: NextRequest) {
 
     const today = getTodayDateString();
 
-    // Fetch or create the profile
     let profile = await prisma.bookspaceProfile.findUnique({
       where: { user_id: userId },
     });
@@ -132,7 +145,6 @@ export async function POST(request: NextRequest) {
 
     const dates = parseDates(profile.streak_calendar);
 
-    // Add today if not already present
     if (!dates.includes(today)) {
       dates.push(today);
     }
@@ -159,3 +171,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
