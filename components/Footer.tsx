@@ -6,6 +6,7 @@ import { Instagram, Linkedin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 /**
  * Global Page Footer Component.
@@ -15,11 +16,25 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
-      setSubscribed(true);
-      setEmail("");
+      try {
+        const response = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: "Newsletter Subscriber", email: email, contact_no: "", idea: "Newsletter signup" })
+        });
+        if (response.ok) {
+          setSubscribed(true);
+          setEmail("");
+          toast.success("Subscribed to newsletter!");
+        } else {
+          toast.error("Failed to subscribe.");
+        }
+      } catch (err) {
+        toast.error("An error occurred.");
+      }
     }
   };
   return (
@@ -130,7 +145,7 @@ export default function Footer() {
 
       {/* Copyright Bar */}
       <div className="text-center text-sm mt-10 border-t border-white/30 pt-4">
-        © 2025 <span className="font-semibold">BookSpace</span>. All rights reserved.
+        © {new Date().getFullYear()} <span className="font-semibold">BookSpace</span>. All rights reserved.
       </div>
     </footer>
   );

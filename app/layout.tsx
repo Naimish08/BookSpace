@@ -4,6 +4,8 @@ import { Inter, Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 // Font configurations loaded via Next.js Google Fonts optimization
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -42,9 +44,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} ${poppins.variable} font-poppins`}
       >
-        <Header />
-        {children}
-        <Footer />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Header />
+          {children}
+          <Footer />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

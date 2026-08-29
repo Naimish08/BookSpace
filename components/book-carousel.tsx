@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRealtimeBooks } from "@/hooks/useRealtimeBooks"
@@ -19,15 +20,6 @@ interface ApiBook {
 }
 
 /**
- * Fallback book collection presented when database records are unpopulated.
- */
-const fallbackBooks: ApiBook[] = [
-	{ id: "fb-1", name: "The Psychology of Money", author: "MORGAN HOUSEL", genre: "Finance", image: "/psychology.png", created_at: "" },
-	{ id: "fb-2", name: "1984", author: "GEORGE ORWELL", genre: "Classics", image: "/georgeorwell.png", created_at: "" },
-	{ id: "fb-3", name: "The Alchemist", author: "PAULO COELHO", genre: "Fiction", image: "/thealchemist.png", created_at: "" },
-]
-
-/**
  * Book Carousel Component.
  * Displays interactive pages of 3 recommended books per slide with smooth scrolling and Supabase Realtime synchronization.
  */
@@ -38,16 +30,17 @@ export default function BookCarousel() {
 	// Fetch initial book collection from API handler
 	useEffect(() => {
 		let active = true
-		fetch("/api/books")
-			.then((res) => (res.ok ? res.json() : []))
-			.then((data: ApiBook[]) => {
+		fetch("/api/books?limit=12&sort=popular")
+			.then((res) => (res.ok ? res.json() : { books: [] }))
+			.then((data: any) => {
 				if (!active) return
-				setInitialBooks(Array.isArray(data) && data.length > 0 ? data : fallbackBooks)
+				const list = Array.isArray(data.books) ? data.books : Array.isArray(data) ? data : []
+				setInitialBooks(list)
 				setLoaded(true)
 			})
 			.catch(() => {
 				if (!active) return
-				setInitialBooks(fallbackBooks)
+				setInitialBooks([])
 				setLoaded(true)
 			})
 		return () => {
@@ -114,14 +107,15 @@ export default function BookCarousel() {
 						{books
 							.slice(pageIndex * 3, pageIndex * 3 + 3)
 							.map((book) => (
-								<div
+								<Link
 									key={book.id}
-									className="rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105"
+									href={`/books/${book.id}`}
+									className="block rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105"
 								>
 									<div className="w-full h-full bg-[#d1a7c2] rounded-lg">
 										<div className="relative aspect-[3/4]">
 											<Image
-												src={book.image || "/placeholder.svg"}
+												src={book.image && book.image !== "/placeholder.svg" ? book.image : "https://covers.openlibrary.org/b/id/10521270-L.jpg"}
 												alt={book.name}
 												fill
 												className="object-cover"
@@ -143,7 +137,7 @@ export default function BookCarousel() {
 											</div>
 										</div>
 									</div>
-								</div>
+								</Link>
 							))}
 					</div>
 				))}

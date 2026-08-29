@@ -1,10 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const CONTACT_EMAIL = "bookspace@gmail.com";
 
 export default function JoinUs() {
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/team')
+      .then(res => res.json())
+      .then(data => {
+        setTeamMembers(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch team", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const groupedMembers: Record<string, any[]> = teamMembers.reduce((acc: Record<string, any[]>, member: any) => {
+    const team = member.team || 'Other';
+    if (!acc[team]) acc[team] = [];
+    acc[team].push(member);
+    return acc;
+  }, {});
+
   const handleJoin = () => {
     window.location.href = "/login-signup";
   };
@@ -149,97 +172,43 @@ export default function JoinUs() {
             A passionate group of individuals working together to build an amazing community for book lovers.
           </p>
 
-          {/* Developers */}
-          <div className="mb-12">
-            <h3 className="font-['Literata'] text-xl sm:text-2xl font-bold text-[#311E17] text-center mb-6 flex items-center justify-center gap-2">
-              <span className="text-2xl">💻</span> Developers
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { name: "Naimish", role: "Lead Developer", image: "/developer1.png" },
-                { name: "Arjun", role: "Frontend Developer", image: "/developer2.png" },
-                { name: "Priya", role: "Backend Developer", image: "/developer3.jpeg" },
-                { name: "Rahul", role: "Full Stack Developer", image: "/developer4.png" },
-              ].map((member, idx) => (
-                <div key={idx} className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-[#AC6F59]/15 hover:border-[#AC6F59]/30 hover:shadow-lg transition-all duration-300 text-center group">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 rounded-full overflow-hidden border-3 border-[#AC6F59]/30 group-hover:border-[#AC6F59] transition-colors">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="font-['Literata'] text-base sm:text-lg font-bold text-[#311E17]">{member.name}</h4>
-                  <p className="font-['Merriweather'] text-xs sm:text-sm text-[#AC6F59]">{member.role}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {loading ? (
+            <p className="text-center text-[#361313]/70">Loading team members...</p>
+          ) : teamMembers.length === 0 ? (
+            <p className="text-center text-[#361313]/70 italic">
+              Our team is growing! Check back later to see our members.
+            </p>
+          ) : (
+            Object.entries(groupedMembers).map(([team, members]: [string, any[]]) => {
+              let icon = "👥";
+              let borderColor = "border-[#AC6F59]";
+              let textColor = "text-[#AC6F59]";
+              
+              if (team.toLowerCase().includes("develop")) { icon = "💻"; borderColor = "border-[#AC6F59]"; textColor = "text-[#AC6F59]"; }
+              else if (team.toLowerCase().includes("design")) { icon = "🎨"; borderColor = "border-[#9D5583]"; textColor = "text-[#9D5583]"; }
+              else if (team.toLowerCase().includes("event")) { icon = "🎉"; borderColor = "border-[#6a5730]"; textColor = "text-[#6a5730]"; }
+              else if (team.toLowerCase().includes("market")) { icon = "📢"; borderColor = "border-[#361313]"; textColor = "text-[#361313]/70"; }
 
-          {/* Designers */}
-          <div className="mb-12">
-            <h3 className="font-['Literata'] text-xl sm:text-2xl font-bold text-[#311E17] text-center mb-6 flex items-center justify-center gap-2">
-              <span className="text-2xl">🎨</span> Designers
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { name: "Sneha", role: "UI/UX Lead", image: "/placeholder-user.jpg" },
-                { name: "Aditya", role: "Graphic Designer", image: "/placeholder-user.jpg" },
-                { name: "Kavya", role: "Visual Designer", image: "/placeholder-user.jpg" },
-                { name: "Rohan", role: "Brand Designer", image: "/placeholder-user.jpg" },
-              ].map((member, idx) => (
-                <div key={idx} className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-[#9D5583]/15 hover:border-[#9D5583]/30 hover:shadow-lg transition-all duration-300 text-center group">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 rounded-full overflow-hidden border-3 border-[#9D5583]/30 group-hover:border-[#9D5583] transition-colors">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+              return (
+                <div key={team} className="mb-12">
+                  <h3 className="font-['Literata'] text-xl sm:text-2xl font-bold text-[#311E17] text-center mb-6 flex items-center justify-center gap-2">
+                    <span className="text-2xl">{icon}</span> {team}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                    {members.map((member: any) => (
+                      <div key={member.id} className={`bg-white/50 backdrop-blur-sm rounded-2xl p-4 border ${borderColor}/15 hover:${borderColor}/30 hover:shadow-lg transition-all duration-300 text-center group`}>
+                        <div className={`w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 rounded-full overflow-hidden border-3 ${borderColor}/30 group-hover:${borderColor} transition-colors`}>
+                          <img src={member.image || "/placeholder-user.jpg"} alt={member.name} className="w-full h-full object-cover" />
+                        </div>
+                        <h4 className="font-['Literata'] text-base sm:text-lg font-bold text-[#311E17]">{member.name}</h4>
+                        <p className={`font-['Merriweather'] text-xs sm:text-sm ${textColor}`}>{member.designation}</p>
+                      </div>
+                    ))}
                   </div>
-                  <h4 className="font-['Literata'] text-base sm:text-lg font-bold text-[#311E17]">{member.name}</h4>
-                  <p className="font-['Merriweather'] text-xs sm:text-sm text-[#9D5583]">{member.role}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Events */}
-          <div className="mb-12">
-            <h3 className="font-['Literata'] text-xl sm:text-2xl font-bold text-[#311E17] text-center mb-6 flex items-center justify-center gap-2">
-              <span className="text-2xl">🎉</span> Events
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { name: "Meera", role: "Events Lead", image: "/placeholder-user.jpg" },
-                { name: "Vikram", role: "Event Coordinator", image: "/placeholder-user.jpg" },
-                { name: "Ananya", role: "Community Manager", image: "/placeholder-user.jpg" },
-                { name: "Siddharth", role: "Partnerships", image: "/placeholder-user.jpg" },
-              ].map((member, idx) => (
-                <div key={idx} className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-[#6a5730]/15 hover:border-[#6a5730]/30 hover:shadow-lg transition-all duration-300 text-center group">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 rounded-full overflow-hidden border-3 border-[#6a5730]/30 group-hover:border-[#6a5730] transition-colors">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="font-['Literata'] text-base sm:text-lg font-bold text-[#311E17]">{member.name}</h4>
-                  <p className="font-['Merriweather'] text-xs sm:text-sm text-[#6a5730]">{member.role}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Marketing */}
-          <div>
-            <h3 className="font-['Literata'] text-xl sm:text-2xl font-bold text-[#311E17] text-center mb-6 flex items-center justify-center gap-2">
-              <span className="text-2xl">📢</span> Marketing
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { name: "Ishaan", role: "Marketing Lead", image: "/placeholder-user.jpg" },
-                { name: "Pooja", role: "Content Strategist", image: "/placeholder-user.jpg" },
-                { name: "Karan", role: "Social Media Manager", image: "/placeholder-user.jpg" },
-                { name: "Divya", role: "Growth Marketing", image: "/placeholder-user.jpg" },
-              ].map((member, idx) => (
-                <div key={idx} className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-[#361313]/15 hover:border-[#361313]/30 hover:shadow-lg transition-all duration-300 text-center group">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 rounded-full overflow-hidden border-3 border-[#361313]/30 group-hover:border-[#361313] transition-colors">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="font-['Literata'] text-base sm:text-lg font-bold text-[#311E17]">{member.name}</h4>
-                  <p className="font-['Merriweather'] text-xs sm:text-sm text-[#361313]/70">{member.role}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+              );
+            })
+          )}
         </section>
       </div>
 

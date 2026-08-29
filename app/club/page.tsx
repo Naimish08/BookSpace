@@ -11,11 +11,11 @@ import { createClient } from "@/utils/superbase/client"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 }
 
 // Plant growth stages based on progress percentage
-const getPlantStage = (progress) => {
+const getPlantStage = (progress: number) => {
   if (progress === 0) return "🌰" // seed
   if (progress <= 20) return "🌱" // sprout
   if (progress <= 40) return "🌿" // small plant
@@ -25,7 +25,7 @@ const getPlantStage = (progress) => {
 }
 
 // Get plant representation for the garden
-const getGardenPlants = (progress) => {
+const getGardenPlants = (progress: number) => {
   const stages = Math.floor(progress / 20)
   const plants = []
   
@@ -70,36 +70,28 @@ export default function Component() {
     nonFictionTarget: yearlyGoals.nonFictionTarget
   })
 
-  const [currentlyReading, setCurrentlyReading] = useState([
-    {
-      id: 1,
-      title: "The Good Girl's Guide to Murder",
-      genre: "Fiction - Mystery",
-      progress: 65,
-      coverImage: "/goodgirlsguide.png"
-    },
-    {
-      id: 2,
-      title: "Psychology of Money",
-      genre: "Non-Fiction - Finance",
-      progress: 30,
-      coverImage: "/psychology.png"
-    },
-    {
-      id: 3,
-      title: "Project Hail Mary",
-      genre: "Fiction - Sci-Fi",
-      progress: 85,
-      coverImage: "/goodgirlsguide.png"
-    },
-    {
-      id: 4,
-      title: "Atomic Habits",
-      genre: "Non-Fiction - Self Help",
-      progress: 45,
-      coverImage: "/psychology.png"
-    }
-  ])
+  const [currentlyReading, setCurrentlyReading] = useState<any[]>([])
+
+  // Load real catalog books if user doesn't have custom reading list
+  useEffect(() => {
+    fetch("/api/books?limit=4&sort=popular")
+      .then((res) => (res.ok ? res.json() : { books: [] }))
+      .then((data: any) => {
+        if (Array.isArray(data.books) && data.books.length > 0) {
+          setCurrentlyReading(
+            data.books.map((b: any, idx: number) => ({
+              id: b.id,
+              title: b.name,
+              genre: b.genre,
+              progress: 50 + idx * 10,
+              coverImage: b.image || "https://covers.openlibrary.org/b/id/10521270-L.jpg",
+              bookId: b.id,
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Update the showOnboarding state declaration
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -117,6 +109,48 @@ export default function Component() {
         if (!onboardingDone && localStorage.getItem('showOnboarding') === 'true') {
           setShowOnboarding(true);
         }
+        
+        // Fetch profile to set yearlyGoals, dailyReadingGoal, todayProgress
+        try {
+          const res = await fetch(`/api/users?id=${session.user.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.bookspaceProfile) {
+              setYearlyGoals(prev => ({
+                ...prev,
+                fictionTarget: data.bookspaceProfile.fiction_target || prev.fictionTarget,
+                nonFictionTarget: data.bookspaceProfile.nonfiction_target || prev.nonFictionTarget,
+              }));
+              setTempYearlyGoals({
+                fictionTarget: data.bookspaceProfile.fiction_target || 12,
+                nonFictionTarget: data.bookspaceProfile.nonfiction_target || 8,
+              });
+              setDailyReadingGoal(data.bookspaceProfile.daily_minutes || 30);
+              setTempDailyGoal(data.bookspaceProfile.daily_minutes || 30);
+              setTodayProgress(data.bookspaceProfile.today_minutes || 0);
+            }
+          }
+        } catch (e) { console.error('Failed to fetch profile:', e); }
+
+        // Fetch book diary for currently reading
+        try {
+          const res = await fetch(`/api/book-diary?userId=${session.user.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            const reading = data.entries?.filter((e: any) => e.type === 'reading') || [];
+            if (reading.length > 0) {
+              setCurrentlyReading(reading.map((e: any) => ({
+                id: e.id,
+                title: e.book.name,
+                genre: e.book.genre,
+                progress: e.progress || 0,
+                coverImage: e.book.image || 'https://covers.openlibrary.org/b/id/10521270-L.jpg',
+                bookId: e.book_id
+              })));
+            }
+          }
+        } catch (e) { console.error('Failed to fetch book diary:', e); }
+
         // Fetch streak from API
         try {
           const res = await fetch(`/api/streak?userId=${session.user.id}`);
@@ -141,7 +175,7 @@ export default function Component() {
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
 
   // Functions
-  const updateProgress = (type, change) => {
+  const updateProgress = (type: 'fiction' | 'nonFiction', change: number) => {
     if (type === 'fiction') {
       setFictionProgress(prev => Math.max(0, Math.min(100, prev + change)))
     } else {
@@ -149,7 +183,7 @@ export default function Component() {
     }
   }
 
-  const updateBookInfo = (type, field, value) => {
+  const updateBookInfo = (type: 'fiction' | 'nonFiction', field: string, value: any) => {
     setCurrentBooks(prev => ({
       ...prev,
       [type]: {
@@ -162,7 +196,7 @@ export default function Component() {
     }))
   }
 
-  const markBookCompleted = (type) => {
+  const markBookCompleted = (type: 'fiction' | 'nonFiction') => {
     setYearlyGoals(prev => ({
       ...prev,
       [`${type}Completed`]: prev[`${type}Completed`] + 1
@@ -185,12 +219,20 @@ export default function Component() {
         const res = await fetch('/api/streak', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
+          body: JSON.stringify({ userId, today_minutes: newProgress })
         });
         if (res.ok) {
           const data = await res.json();
           setReadingStreak(data.currentStreak || 0);
         }
+        
+        // Update profile directly for today_minutes if streak API doesn't do it
+        await fetch('/api/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, today_minutes: newProgress })
+        }).catch(() => {});
+
         // Also check for new badges
         await fetch('/api/badges/check', {
           method: 'POST',
@@ -201,21 +243,39 @@ export default function Component() {
     }
   }
 
-  const handleDailyGoalUpdate = () => {
+  const handleDailyGoalUpdate = async () => {
     setDailyReadingGoal(tempDailyGoal)
     setIsEditingDaily(false)
+    if (userId) {
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, daily_minutes: tempDailyGoal })
+      }).catch(() => {});
+    }
   }
 
-  const handleYearlyGoalsUpdate = () => {
+  const handleYearlyGoalsUpdate = async () => {
     setYearlyGoals(prev => ({
       ...prev,
       fictionTarget: tempYearlyGoals.fictionTarget,
       nonFictionTarget: tempYearlyGoals.nonFictionTarget
     }))
     setIsEditingYearly(false)
+    if (userId) {
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId, 
+          fiction_target: tempYearlyGoals.fictionTarget,
+          nonfiction_target: tempYearlyGoals.nonFictionTarget
+        })
+      }).catch(() => {});
+    }
   }
 
-  const updateBookProgress = (bookId) => {
+  const updateBookProgress = (bookId: any) => {
     setCurrentlyReading(prev => prev.map(book => {
       if (book.id === bookId) {
         const newProgress = Math.min(100, book.progress + 10) // Increment by 10%

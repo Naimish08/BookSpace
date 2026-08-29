@@ -33,7 +33,20 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<{ books: any[]; users: any[]; blogs: any[] }>({ books: [], users: [], blogs: [] })
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [featuredBooks, setFeaturedBooks] = useState<any[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
+
+  // Fetch top 2 books dynamically for currently reading bookshelf
+  useEffect(() => {
+    fetch("/api/books?limit=2&sort=popular")
+      .then((res) => (res.ok ? res.json() : { books: [] }))
+      .then((data: any) => {
+        if (Array.isArray(data.books) && data.books.length > 0) {
+          setFeaturedBooks(data.books.slice(0, 2))
+        }
+      })
+      .catch(() => {})
+  }, [])
   
   // Debounce search query input to avoid excess API calls
   const debouncedQuery = useDebounce(searchQuery, 300)
@@ -135,6 +148,7 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => hasResults && setShowResults(true)}
+                onKeyDown={(e) => e.key === 'Escape' && setShowResults(false)}
                 className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 bg-[#BA7FCB] text-[#241943] placeholder-[#241943] focus:outline-none focus:ring-2 focus:ring-[#a87c9f]"
               />
               {isSearching && (
@@ -159,15 +173,21 @@ export default function Home() {
                           <BookOpen size={14} /> Books
                         </div>
                         {searchResults.books.map((book: any) => (
-                          <div key={book.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F3E8FF] cursor-pointer transition-colors">
-                            <div className="w-8 h-10 bg-[#E1B5EE] rounded flex items-center justify-center text-xs font-bold text-[#462C90]">
-                              {book.name?.charAt(0)}
+                          <Link key={book.id} href={`/books/${book.id}`}>
+                            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#F3E8FF] cursor-pointer transition-colors">
+                              {book.image ? (
+                                <Image src={book.image} alt={book.name} width={32} height={40} className="w-8 h-10 object-cover rounded" />
+                              ) : (
+                                <div className="w-8 h-10 bg-[#E1B5EE] rounded flex items-center justify-center text-xs font-bold text-[#462C90]">
+                                  {book.name?.charAt(0)}
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm font-semibold text-[#241943]">{book.name}</p>
+                                <p className="text-xs text-[#BA7FCB]">{book.author} · {book.genre}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-semibold text-[#241943]">{book.name}</p>
-                              <p className="text-xs text-[#BA7FCB]">{book.author} · {book.genre}</p>
-                            </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -299,14 +319,28 @@ export default function Home() {
           <div className="relative bg-[#f8efd0]/90 rounded-2xl p-6 max-w-5xl mx-auto z-10">
             <div className="flex flex-col md:flex-row gap-6 items-center">
               <div className="w-full md:w-1/2 flex justify-center gap-4">
-                <div className="flex flex-col items-center">
-                  <Image src="/goodgirlsguide.png" alt="Currently Reading Book Cover" width={160} height={240} className="rounded shadow-lg w-[160px] h-auto" />
-                  <p className="mt-2 text-[#5d4037] font-medium">Fiction</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <Image src="/psychology.png" alt="Second Book" width={160} height={240} className="rounded shadow-lg w-[160px] h-auto" />
-                  <p className="mt-2 text-[#5d4037] font-medium">Non-Fiction</p>
-                </div>
+                {featuredBooks.length > 0 ? (
+                  featuredBooks.map((book) => (
+                    <Link key={book.id} href={`/books/${book.id}`} className="flex flex-col items-center group">
+                      <div className="relative w-[150px] h-[220px] rounded shadow-lg overflow-hidden transition-transform group-hover:scale-105">
+                        <Image
+                          src={book.image && book.image !== "/placeholder.svg" ? book.image : "https://covers.openlibrary.org/b/id/10521270-L.jpg"}
+                          alt={book.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="mt-2 text-[#5d4037] font-semibold text-sm line-clamp-1 max-w-[150px] text-center">{book.name}</p>
+                      <p className="text-xs text-[#a87c9f]">{book.genre}</p>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="flex justify-center gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-[150px] h-[220px] bg-[#d1a7c2] rounded animate-pulse" />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="w-full md:w-1/2 flex flex-col justify-center items-center text-center">
                 <h3 className="text-2xl font-serif text-[#5d4037] mb-2">WE ARE CURRENTLY READING</h3>

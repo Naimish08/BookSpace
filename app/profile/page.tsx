@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/superbase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -218,7 +218,7 @@ const ProfileCard = ({
 
 
 // Updated BookCover component
-const BookCover = ({ imageUrl, title, author, rating = 5 }) => (
+const BookCover = ({ imageUrl, title, author, rating = 5 }: { imageUrl: string; title: string; author: string; rating?: number }) => (
   <div className="w-28 text-center space-y-2">
     <img
       src={imageUrl}
@@ -242,7 +242,7 @@ const BookCover = ({ imageUrl, title, author, rating = 5 }) => (
 // Placeholder for the PieChart component
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({ data }) => {
+const PieChart = ({ data }: { data: { labels: string[]; values: number[] } }) => {
   const chartData = {
     labels: data.labels,
     datasets: [
@@ -426,10 +426,15 @@ const RecapSection = styled.section`
 `;
 
 export default function ProfilePage() {
-  const genresData = {
-    labels: ["Fiction", "Non-Fiction", "Mystery", "Fantasy", "Biography"],
-    values: [10, 5, 8, 12, 6],
-  };
+  const searchParams = useSearchParams();
+  const viewingUserId = searchParams.get('userId');
+
+  const router = useRouter();
+  const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isOtherUser, setIsOtherUser] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
 
   const [bookName, setBookName] = useState("");
   const [author, setAuthor] = useState("");
@@ -439,11 +444,20 @@ export default function ProfilePage() {
   const [thoughts, setThoughts] = useState("");
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
-  const [genresToExplore, setGenresToExplore] = useState([]);
+  const [genresToExplore, setGenresToExplore] = useState<string[]>([]);
   const [genresInput, setGenresInput] = useState("");
   const [wishlist, setWishlist] = useState([] as { id: string; name: string }[]);
   const [wishlistInput, setWishlistInput] = useState("");
   const [diaryEntries, setDiaryEntries] = useState<any[]>([]);
+  const [streakData, setStreakData] = useState<{ currentStreak: number; dates: string[] }>({
+    currentStreak: 0,
+    dates: [],
+  });
+  const [logging, setLogging] = useState(false);
+  const [availableBooks, setAvailableBooks] = useState<any[]>([]);
+  const [selectedBookId, setSelectedBookId] = useState("");
+  const [readingGoals, setReadingGoals] = useState<string[]>(["Read Psychology of Money"]);
+  const [readingGoalsInput, setReadingGoalsInput] = useState("");
 
   const handleStarClick = (index: number) => {
     setRating(index + 1);
@@ -499,11 +513,6 @@ export default function ProfilePage() {
     }
   };
 
-  const router = useRouter();
-  const supabase = createClient();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -511,7 +520,32 @@ export default function ProfilePage() {
         router.push("/login-signup");
         return;
       }
-      setUser(session.user);
+      
+      const sessionUser = session.user;
+      setUser(sessionUser);
+
+      const targetUserId = viewingUserId && viewingUserId !== sessionUser.id ? viewingUserId : sessionUser.id;
+      setIsOtherUser(!!(viewingUserId && viewingUserId !== sessionUser.id));
+
+      try {
+        const res = await fetch(`/api/users?id=${targetUserId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const fetchedProfile = {
+            ...data.user,
+            views: data.user?.bookspaceProfile?.views || 0,
+            reads: data.user?.bookspaceProfile?.reads || 0,
+            bio: data.user?.bookspaceProfile?.bio || data.user?.bio || "",
+          };
+          setProfileData(fetchedProfile);
+          if (data.user?.bookspaceProfile?.reading_goals?.length > 0) {
+            setReadingGoals(data.user.bookspaceProfile.reading_goals);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch profile:", e);
+      }
+
       setLoading(false);
     };
 
@@ -521,18 +555,19 @@ export default function ProfilePage() {
       if (!session) router.push("/login-signup");
       else {
         setUser(session.user);
-        setLoading(false);
+        // Note: Full refetch logic not duplicated here to keep simple
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth, router]);
+  }, [supabase.auth, router, viewingUserId]);
 
   // Fetch streak, persistent wishlist, book diary, and available books once the user is known
   useEffect(() => {
-    if (!user?.id) return;
+    const targetId = isOtherUser ? viewingUserId : user?.id;
+    if (!targetId) return;
 
-    fetch(`/api/streak?userId=${user.id}`)
+    fetch(`/api/streak?userId=${targetId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) setStreakData({ currentStreak: data.currentStreak || 0, dates: data.dates || [] });
@@ -555,13 +590,14 @@ export default function ProfilePage() {
       })
       .catch((e) => console.error("Failed to fetch book diary:", e));
 
-    fetch("/api/books")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
-        if (Array.isArray(data)) setAvailableBooks(data);
+    fetch("/api/books?limit=100")
+      .then((res) => (res.ok ? res.json() : { books: [] }))
+      .then((data: any) => {
+        const list = Array.isArray(data.books) ? data.books : Array.isArray(data) ? data : [];
+        setAvailableBooks(list);
       })
       .catch((e) => console.error("Failed to fetch books:", e));
-  }, [user?.id]);
+  }, [user?.id, isOtherUser, viewingUserId]);
 
   // Record today's reading activity
   const handleLogReading = async () => {
@@ -643,13 +679,40 @@ export default function ProfilePage() {
   const username = user.email.split('@')[0] || "readinglovesme";
   const email = user.email || "readinglovesme@gmail.com";
 
-  // Sample user data for Monthly Reading Recap
-  const booksRead = [
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  
+  const currentMonthEntries = diaryEntries.filter((entry) => {
+    if (entry.type !== 'finished') return false;
+    const d = new Date(entry.endDate || entry.end_date || entry.createdAt || Date.now());
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const booksRead = currentMonthEntries.length > 0 ? currentMonthEntries.map((entry) => ({
+    title: entry.title || entry.book?.name || "Unknown",
+    author: entry.author || entry.book?.author || "Unknown",
+    rating: entry.rating || 5,
+  })) : [
     { title: "Good Murder Guide", author: "Holly Jackson", rating: 4 },
     { title: "The Alchemist", author: "Paulo Coelho", rating: 5 },
     { title: "Psychology of Money", author: "Morgan Housel", rating: 3 },
     { title: "1984", author: "George Orwell", rating: 4 },
   ];
+
+  const genreCounts = diaryEntries.reduce((acc, entry) => {
+    const g = entry.genre || entry.book?.genre;
+    if (g) {
+      acc[g] = (acc[g] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
+  const hasGenres = Object.keys(genreCounts).length > 0;
+  const genresData: { labels: string[]; values: number[] } = {
+    labels: hasGenres ? Object.keys(genreCounts) : ["Fiction", "Non-Fiction", "Mystery", "Fantasy", "Biography"],
+    values: hasGenres ? (Object.values(genreCounts) as number[]) : [10, 5, 8, 12, 6],
+  };
   const readingStreak = streakData.currentStreak;
   const streakDates = streakData.dates;
   const booksReviewed = 3;
@@ -659,9 +722,10 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen p-4 sm:p-8" style={{ background: "#FDE8BE" }}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-        <ChallengeBanner />
+        {!isOtherUser && <ChallengeBanner />}
         <ProfileCard 
-          user={{ username, email, bio: "" }} 
+          user={profileData || { ...(user || {}), username, email, bio: "" }} 
+          currentUserId={user?.id || ""}
           onSignOut={handleSignOut} 
         />
         <RecapSection>
@@ -694,14 +758,14 @@ export default function ProfilePage() {
               <div className="bg-white rounded-lg p-4 text-gray-800">
                 <Calendar
                   mode="single"
-                  selected={new Date("2025-08-03")}
+                  selected={new Date()}
                   className="rounded-md border text-sm"
                   style={{ backgroundColor: "#ffffff", padding: "10px" }}
-                  dayClassName={(date) => {
-                    const fullDate = date.toISOString().split('T')[0];
-                    return streakDates.includes(fullDate)
-                      ? "bg-[#BA7FCB] text-white font-bold rounded-full"
-                      : "text-gray-500";
+                  modifiers={{
+                    streak: (date: Date) => streakDates.includes(date.toISOString().split('T')[0]),
+                  }}
+                  modifiersClassNames={{
+                    streak: "bg-[#BA7FCB] text-white font-bold rounded-full",
                   }}
                 />
                 <p className="mt-2 text-sm text-center text-[#483285] font-semibold">Streak: {readingStreak} days</p>
@@ -719,6 +783,7 @@ export default function ProfilePage() {
           </div>
         </RecapSection>
 
+        {!isOtherUser && (
         <section className="bg-[#E1B5EE] p-6 sm:p-8 rounded-2xl shadow-lg">
           <h2 className="text-4xl font-bold text-center text-[#483285] mb-8">Book Diary</h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -867,6 +932,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
+        )}
 
         <section className="bg-[#E1B5EE] p-6 sm:p-8 rounded-2xl shadow-lg">
           <div className="flex justify-center items-start gap-4">

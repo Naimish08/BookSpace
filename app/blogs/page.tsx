@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,7 +50,7 @@ function BlogCardSkeleton() {
   );
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
@@ -58,7 +58,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.1,
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   }),
 };

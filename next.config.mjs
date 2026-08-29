@@ -8,13 +8,17 @@ try {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'covers.openlibrary.org' },
+      { protocol: 'https', hostname: 'books.google.com' },
+    ],
   },
   experimental: {
     webpackBuildWorker: true,

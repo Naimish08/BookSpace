@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
             name: title,
             author: author || 'Unknown Author',
             genre: genre || 'Fiction',
-            image: '/psychology.png',
+            image: 'https://covers.openlibrary.org/b/id/10521270-L.jpg',
           },
         });
         targetBookId = newBook.id;

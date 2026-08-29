@@ -30,28 +30,41 @@ model User {
   chatMessages             ChatMessage[]
   directMessages           DirectMessage[]
   conversationParticipants ConversationParticipant[]
+  bookReviews              BookReview[]
 
   @@index([username])
 }
 
 model BookspaceProfile {
-  user_id         String   @id @db.Uuid
-  bio             String
-  current_read    String?  @db.Uuid
-  views           Int      @default(0)
-  reads           Int      @default(0)
-  connection      String[] @db.Uuid
-  streak_calendar Json?    @db.Json
-  currentBook     Book?    @relation(fields: [current_read], references: [id])
-  user            User     @relation(fields: [user_id], references: [id])
+  user_id            String   @id @db.Uuid
+  bio                String
+  current_read       String?  @db.Uuid
+  views              Int      @default(0)
+  reads              Int      @default(0)
+  connection         String[] @db.Uuid
+  streak_calendar    Json?    @db.Json
+  fiction_target     Int      @default(12)
+  nonfiction_target  Int      @default(8)
+  daily_minutes      Int      @default(30)
+  today_minutes      Int      @default(0)
+  today_date         String?
+  reading_goals      String[] @default([])
+  genres_explore     String[] @default([])
+  currentBook        Book?    @relation(fields: [current_read], references: [id])
+  user               User     @relation(fields: [user_id], references: [id])
 }
 
 model Book {
   id               String             @id @default(uuid()) @db.Uuid
+  external_id      String?            @unique
   name             String
   author           String
   genre            String
   image            String
+  description      String?
+  last_accessed_at DateTime           @default(now())
+  search_count     Int                @default(0)
+  is_pinned        Boolean            @default(false)
   created_at       DateTime           @default(now())
   bookDiaries      BookDiary[]
   bookExchanges    BookExchange[]
@@ -59,9 +72,11 @@ model Book {
   BookspaceProfile BookspaceProfile[]
   monthlyReads     MonthlyRead[]
   wishlists        Wishlist[]
+  bookReviews      BookReview[]
 
   @@index([name])
   @@index([author])
+  @@index([last_accessed_at])
 }
 
 model BookDiary {
@@ -72,8 +87,26 @@ model BookDiary {
   start_date  DateTime?
   end_date    DateTime?
   description String?
+  rating      Int?
+  progress    Int       @default(0)
   book        Book      @relation(fields: [book_id], references: [id])
   user        User      @relation(fields: [user_id], references: [id])
+}
+
+model BookReview {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  book_id    String?  @db.Uuid
+  book_title String
+  author     String
+  rating     Int
+  content    String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+  book       Book?    @relation(fields: [book_id], references: [id])
+
+  @@index([book_id])
+  @@index([created_at])
 }
 
 model BookExchange {

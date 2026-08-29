@@ -35,6 +35,13 @@ export default function Events() {
   const [registerCount, setRegisterCount] = useState<number | null>(null);
   const [registering, setRegistering] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
+  
+  // Book Exchange States
+  const [exchanges, setExchanges] = useState<any[]>([]);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [userBooks, setUserBooks] = useState<any[]>([]);
+  const [selectedBook, setSelectedBook] = useState("");
+  const [offering, setOffering] = useState(false);
 
   // Load the featured (most recent) event
   useEffect(() => {
@@ -50,6 +57,16 @@ export default function Events() {
       .catch(() => {
         if (active) setFeaturedEvent(null);
       });
+
+    // Fetch exchanges
+    fetch("/api/exchanges")
+      .then((res) => (res.ok ? res.json() : { exchanges: [] }))
+      .then((data) => {
+        if (!active) return;
+        setExchanges(data.exchanges || []);
+      })
+      .catch(() => {});
+
     return () => {
       active = false;
     };
@@ -112,6 +129,48 @@ export default function Events() {
     }
   };
 
+  const handleOpenOfferModal = async () => {
+    if (!userId) {
+      alert("Please sign in to offer a book.");
+      return;
+    }
+    setShowOfferModal(true);
+    try {
+      const res = await fetch(`/api/book-diary?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        const books = data.entries?.map((e: any) => e.book).filter(Boolean) || [];
+        // Deduplicate books
+        const uniqueBooks = Array.from(new Map(books.map((b: any) => [b.id, b])).values());
+        setUserBooks(uniqueBooks);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleOfferBook = async () => {
+    if (!selectedBook) return;
+    setOffering(true);
+    try {
+      const res = await fetch("/api/exchanges", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, bookId: selectedBook }),
+      });
+      if (res.ok) {
+        const newExchange = await res.json();
+        setExchanges(prev => [newExchange.exchange, ...prev]);
+        setShowOfferModal(false);
+        setSelectedBook("");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setOffering(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#FDE8BE]">
       <div className="container mx-auto px-4">
@@ -125,7 +184,7 @@ export default function Events() {
           <div className="flex justify-center">
             <div className="bg-[#f0befd] relative rounded-xl p-4 text-center w-full max-w-xl">
               <div className="text-[#5b3758] text-3xl sm:text-4xl font-bold mb-4">
-                <SetCountDown />
+                <SetCountDown targetDate={featuredEvent?.time} />
               </div>
 
               <p className="text-[#241943] font-medium">
@@ -171,51 +230,89 @@ export default function Events() {
 
         {/* Book Exchange Section */}
         <section className="py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 bg-[#f0befd] relative rounded-xl p-6">
+          <div className="bg-[#f0befd] relative rounded-xl p-6 sm:p-10 mb-8 flex flex-col items-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#9d5583] mb-2 text-center">
+              Blind Date with a Book
+            </h2>
+            <div className="text-2xl sm:text-4xl font-bold text-center">×</div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-8 text-center">
+              Book Exchange
+            </h2>
+            
+            <div className="w-full flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-[#462C90]">Available for Exchange</h3>
+              <Button 
+                onClick={handleOpenOfferModal}
+                className="bg-[#462C90] text-[#E1B5EE] hover:bg-[#241943]"
+              >
+                Offer a Book
+              </Button>
+            </div>
 
-            {/* Left Column */}
-            <div className="relative pb-24 sm:pb-0">
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#9d5583] mb-2 text-center">
-                Blind Date with a Book
-              </h2>
-              <div className="text-2xl sm:text-4xl font-bold text-center">×</div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-4 text-center pb-6">
-                Book Exchange
-              </h2>
-
-              {/* Thumbnail Selector */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-4">
-                {images.map((img, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedImage(img)} /*sm:w-20 sm:h-20 */
-                    className="w-[100px] h-[100px] sm:w-30 sm:h-30 rounded-full overflow-hidden border-2 border-white cursor-pointer hover:scale-110 transition-transform duration-200"
-                  >
-                    <Image
-                      src={img}
-                      alt={`Thumbnail ${index}`}
-                      width={64}
-                      height={64}
-                      className="object-cover w-full h-full"
-                    />
+            {/* Exchanges Grid */}
+            {exchanges.length === 0 ? (
+              <p className="text-gray-600 italic">No books available for exchange right now. Be the first!</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 w-full">
+                {exchanges.map((exc) => (
+                  <div key={exc.id} className="bg-white rounded-lg p-4 shadow-md flex flex-col items-center text-center">
+                    <div className="w-24 h-36 mb-3 relative overflow-hidden rounded shadow-sm">
+                      <Image 
+                        src={exc.book?.image || "/bookstack.png"} 
+                        alt={exc.book?.name || "Book Cover"} 
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h4 className="font-bold text-sm text-[#241943] line-clamp-2 mb-1">{exc.book?.name}</h4>
+                    <p className="text-xs text-gray-500 line-clamp-1 mb-2">{exc.book?.author}</p>
+                    <div className="mt-auto pt-2 border-t border-gray-100 w-full">
+                      <p className="text-[10px] text-gray-400">Offered by</p>
+                      <p className="text-xs font-semibold text-[#9d5583]">{exc.user?.username || exc.user?.name || "Anonymous"}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Right Column - Large Image */}
-            <div className="flex justify-center items-center mt-8 sm:mt-0">
-              <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden bg-[#9d5583]">
-                <Image
-                  src={selectedImage}
-                  alt="Selected Book"
-                  width={256}
-                  height={256}
-                  className="object-cover w-full h-full"
-                />
+          {/* Offer Modal */}
+          {showOfferModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                <h2 className="text-xl font-bold mb-4 text-[#462C90]">Offer a Book for Exchange</h2>
+                <p className="text-sm text-gray-600 mb-4">Select a book from your reading history to offer in the exchange.</p>
+                
+                {userBooks.length === 0 ? (
+                  <p className="text-sm text-red-500 mb-4">You don't have any books in your reading history yet.</p>
+                ) : (
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded mb-6 text-sm"
+                    value={selectedBook}
+                    onChange={(e) => setSelectedBook(e.target.value)}
+                  >
+                    <option value="">Select a book...</option>
+                    {userBooks.map((book: any) => (
+                      <option key={book.id} value={book.id}>
+                        {book.name} ({book.author})
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowOfferModal(false)}>Cancel</Button>
+                  <Button 
+                    className="bg-[#462C90] text-white" 
+                    disabled={!selectedBook || offering}
+                    onClick={handleOfferBook}
+                  >
+                    {offering ? "Offering..." : "Offer Book"}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Event Calendar */}
           <div className="bg-gray-100 p-4 rounded-xl mb-8">
